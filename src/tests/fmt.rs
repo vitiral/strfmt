@@ -18,32 +18,27 @@ fn test_fmt_align() {
     // test basic
     let mut s = String::new();
     fmt.write(&mut s, &vars);
-    println!("out: {:?}", s);
     assert!(s == "X");
 
     // test alignment
     s.clear();
     fmt.width = Some(5);
     fmt.write(&mut s, &vars);
-    println!("out: {:?}", s);
     assert!(s == "    X");
 
     s.clear();
     fmt.align = Align::Right;
     fmt.write(&mut s, &vars);
-    println!("out: {:?}", s);
     assert!(s == "    X");
 
     s.clear();
     fmt.align = Align::Center;
     fmt.write(&mut s, &vars);
-    println!("out: {:?}", s);
     assert!(s == "  X  ");
 
     s.clear();
     fmt.align = Align::Left;
     fmt.write(&mut s, &vars);
-    println!("out: {:?}", s);
     assert!(s == "X    ");
 
     // more center tests
@@ -51,7 +46,6 @@ fn test_fmt_align() {
     fmt.align = Align::Center;
     fmt.width = Some(6);
     fmt.write(&mut s, &vars);
-    println!("out: {:?}", s);
     assert!(s == "  X   ");
 
     // with precision
@@ -62,14 +56,12 @@ fn test_fmt_align() {
     fmt.align = Align::None;
     fmt.precision = Some(6);
     fmt.write(&mut s, &vars);
-    println!("out: {:?}", s);
     assert!(s == "    X");
 
     // unless width is < len
     s.clear();
     fmt.identifier = "long";
     fmt.write(&mut s, &vars);
-    println!("out: {:?}", s);
     assert!(s == "tooool");
 }
 
@@ -90,13 +82,11 @@ fn test_fmt_from_str() {
     expected.fill = Some('3');
     expected.align = Align::Left;
     result = Fmt::from_str("x:3<").unwrap();
-    println!("result: {:?}", result);
     assert!(result == expected);
 
     expected.precision = Some(5);
     expected.width = Some(3);
     result = Fmt::from_str("x:3<3.5").unwrap();
-    println!("result: {:?}", result);
     assert!(result == expected);
 
     expected = Fmt {
@@ -107,12 +97,11 @@ fn test_fmt_from_str() {
         precision: Some(5),
     };
     result = Fmt::from_str("x:33.5").unwrap();
-    println!("result: {:?}", result);
     assert!(result == expected);
 
-    assert!(Fmt::from_str("{x:<.3}").is_ok());
-    assert!(Fmt::from_str("{x:^.3}").is_ok());
-    assert!(Fmt::from_str("{xxx: <88.3}").is_ok());
-    assert!(Fmt::from_str("{xxx:  <88.3}").is_err());
-    assert!(Fmt::from_str("{xxx:a34}").is_err());
+    assert!(Fmt::from_str("x:<.3").is_ok());
+    assert!(Fmt::from_str("x:^.3").is_ok());
+    assert!(Fmt::from_str("xxx: <88.3").is_ok());
+    assert!(Fmt::from_str("xxx:  <88.3").is_err());
+    assert!(Fmt::from_str("xxx:a34").is_err());
 }

@@ -15,7 +15,7 @@ mod tests;
 lazy_static!{
     pub static ref FMT_PAT: Regex = Regex::new(
 //        1-ident 2-fill 3-align 4-width  5-precision
-        r"([\w\d-_]+)(?::?(.)?([<>^])?([\d]+)?(?:\.([\d]+))?)").unwrap();
+        r"^([\w\d-_]+)(?::(.)?([<>^])?([\d]+)?(?:\.([\d]+))?)?\z").unwrap();
 // if align doesn't exist, width == fill + width
 }
 
@@ -27,6 +27,7 @@ enum Align {
     None,
 }
 
+#[derive(Debug, PartialEq)]
 pub struct FmtError(String);
 
 /// LOC-fmtu
@@ -90,7 +91,7 @@ impl<'a> Fmt<'a> {
             None => return Err("Invalid format string".to_string()),
             Some(c) => c,
         };
-        println!("captures: {:?}", captures);
+        // println!("captures: {:?}", captures);
         let mut out = Fmt {
             identifier: captures.at(1).unwrap(), // not optional==unwrap
             fill: None,
@@ -174,6 +175,7 @@ impl<'a> Fmt<'a> {
     /// write the formatted string to `s` and return true. If there is an error: clear `s`,
     /// write the error and return false
     pub fn write(&self, s: &mut String, vars: &'a HashMap<String, String>) -> bool {
+        // println!("- writting...");
         let ref value = match vars.get(self.identifier) {
             Some(v) => v,
             None => {
@@ -182,62 +184,45 @@ impl<'a> Fmt<'a> {
                 return false;
             }
         };
-        let len = value.len();
+        let len = match self.precision {
+            None => value.len(),
+            Some(p) => {
+                if p < value.len() {
+                    p
+                } else {
+                    value.len()
+                }
+            }
+        };
         let mut value = value.chars();
         let mut pad: usize = 0;
         let fill = self.fill.unwrap_or(' ');
-        let mut precision: Option<usize> = None;
+
         match self.width {
             Some(mut width) => {
-                match width > len {
-                    true => {
-                        match self.align {
-                            Align::Left => pad = width - len,
-                            Align::Center => {
-                                width = width - len;
-                                pad = width / 2;
-                                write_char(s, fill, pad);
-                                pad += width % 2;
-                            }
-                            Align::Right | Align::None => {
-                                write_char(s, fill, width - len);
-                            }
+                if width > len {
+                    // println!("  - width > len");
+                    match self.align {
+                        Align::Left => pad = width - len,
+                        Align::Center => {
+                            width = width - len;
+                            pad = width / 2;
+                            write_char(s, fill, pad);
+                            pad += width % 2;
+                        }
+                        Align::Right | Align::None => {
+                            write_char(s, fill, width - len);
                         }
                     }
-                    // width is greater than length, padding not possible but
-                    // precision still is.
-                    // luckily, the align marker is ignored in this case.
-                    false => precision = self.precision,
-                }
-            }
-            None => {
-                // no alignment, precision setting is possible
-                match self.precision {
-                    Some(prec) => precision = Some(prec),
-
-                    None => {} // no special settings
-                }
-            }
-        }
-        // deal with precision variable
-        match precision {
-            Some(prec) => {
-                let n = write_from(s, &mut value, prec);
-                if n < prec {
-                    // only write more if align == Left
-                    match self.align {
-                        Align::Left => pad = prec - n,
-                        _ => return true, // wrote all characters
-                    }
-                } else {
-                    return true; // precision has written maximum characters
                 }
             }
             None => {}
         }
-
-        // Done reading settings, now just write and then pad
-        s.extend(value);
+        if self.precision.is_none() {
+            s.extend(value);
+        } else {
+            write_from(s, &mut value, self.precision.unwrap());
+        }
         write_char(s, fill, pad);
         true
     }
@@ -253,7 +238,7 @@ pub fn strfmt(fmtstr: &str, vars: &HashMap<String, String>) -> Result<String, Fm
     for c in fmtstr.chars() {
         bytes_read += c.len_utf8();
         if c == '{' {
-            if reading_fmt && opening_brace == bytes_read - 1 {
+            if reading_fmt && opening_brace == bytes_read - 2 {
                 // found {{
                 out.push(c);
                 out.push(c);
@@ -273,9 +258,18 @@ pub fn strfmt(fmtstr: &str, vars: &HashMap<String, String>) -> Result<String, Fm
                 out.push(c); // extra '}' found, ignore
             } else {
                 // discard before opening brace
+                // println!(" - remaining before: {:?}", remaining);
                 let (_, r) = remaining.split_at(opening_brace);
+
+                // get the fmt pattern and remaining
                 let (fmt_pattern, r) = r.split_at(bytes_read - opening_brace);
                 remaining = r;
+
+                // discard the braces
+                let (_, fmt_pattern) = fmt_pattern.split_at(1);
+                let (fmt_pattern, _) = fmt_pattern.split_at(fmt_pattern.len() - 1);
+                // println!(" - pattern found: {:?}", fmt_pattern);
+                // println!(" - remaining after: {:?}", remaining);
                 // use the Fmt object to write the formatted string
                 match Fmt::from_str(fmt_pattern) {
                     Ok(fmt) => {

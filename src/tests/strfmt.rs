@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use test::Bencher;
 use super::super::{strfmt, Fmt};
 
 #[test]

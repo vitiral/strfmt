@@ -1,26 +1,27 @@
 # strfmt: rust library for formatting dynamic strings
 
 This library is for rust developers who want to bring rust-like
-formatting to non-static strings. For example, there is no way to
-do this:
+formatting to non-static strings. 
 
+Basic use:
 ```
-let mut map = HashMap::new();
-map.insert("name", "bob");
-map.insert("job", "python developer");
+extern crate strfmt;
+use strfmt::strfmt;
+use std::collections::HashMap;
 
-// f contains "hi, my name is {name} and I am a {job}!"
-let mut f = File::open("example.txt").unwrap();
-let mut s = String::new();
-f.read_to_string(&mut s).unwrap();
+#[test]
+fn it_works() {
+    let mut vars = HashMap::new();
+    vars.insert("name".to_string(), "bob".to_string());
+    vars.insert("job".to_string(), "python developer".to_string());
 
-// prints "hi, my name is bob and I am a python developer!"
-println!("{}", format(s, map));
+    let fmt = "hi, my name is {name} and I am a {job}!".to_string();
+    assert!(strfmt(&fmt, &vars).unwrap() == "hi, my name is bob and I am a python developer!")
+}
 ```
 
-This means that if you ever wanted to provide an interface where
-your user could use rust-style string formatting you were SOL -- well
-no more!
+You can use this library any time you have dynamic strings you want to format, such as
+if you are providing your users a ui or are reading configuration files.
 
 ## Scope
 
@@ -50,3 +51,5 @@ Some notes:
 - `type` is not supported because it is always "s"
 - `sign`, `#`, `0` and `.` are not supported because they are only related to numeric
     types
+
+```

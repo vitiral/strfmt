@@ -117,7 +117,7 @@ fn test_fmt () {
     let mut vars: HashMap<String, String> = HashMap::new();
     vars.insert("x".to_string(), "X".to_string());
 
-    let fmt = Fmt{
+    let mut fmt = Fmt{
         identifier: "x",
         fill: None,
         align: Align::None,
@@ -128,4 +128,9 @@ fn test_fmt () {
     let mut s = String::new();
     fmt.write(&mut s, &vars);
     assert!(s == "X");
+
+    s.clear();
+    f.width = 5;
+    fmt.write(&mut s, &vars);
+    assert!(s == "    X");
 }

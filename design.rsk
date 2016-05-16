@@ -1,0 +1,58 @@
+
+[REQ-purpose]
+refs = ["{repo}/README.md"]
+
+[REQ-syntax]
+text = '''
+the following syntax will be used (comments on how it differs from rust's)
+```
+format_string := <text> [ format <text> ] *
+format := '{' argument [ ':' format_spec ] '}'  # does not support empty `{}`
+argument := identifier  # does not support: integer
+
+# format_spec does not support: sign, '#', 0, '.' precision or type
+format_spec := [[fill]align][width]
+fill := character
+align := '<' | '^' | '>'
+width := count
+precision := count
+```
+'''
+
+[REQ-syntax-ineractions]
+text = '''
+- alignment is ignored without a width
+- precision is ignored if a width is given
+- precsion only pads if align == Left
+'''
+
+[REQ-crate]
+text = '''
+This library **shall** be accessible on crates.io, rust's library
+repository
+'''
+
+[REQ-performance]
+text = '''
+This library **shall** run as fast as possible and with as little
+memory as possible
+'''
+
+[SPC-strfmt]
+partof = "REQ-purpose"
+text = '''
+there **shall** be a public function that accepts a string to
+format and a `HashMap<String, String>` to use as values.
+
+It will format the values according to 
+'''
+
+[SPC-fmt]
+loc = "LOC-fmt"
+text = '''
+The `Fmt` struct **shall** contain information of how to format
+a string and have a method that accepts the map to format
+
+The `Fmt` struct **will** be the primary workhorse of actually
+formatting the string
+```

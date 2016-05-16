@@ -70,40 +70,55 @@ impl<'a> Fmt <'a> {
         let mut written: usize = 0;
         let mut pad: usize = 0;
         let fill = self.fill.unwrap_or(' ');
+        let mut precision: Option<usize> = None;
         match self.width {
-            Some(width) => {
-                match self.align {
-                    Align::Left => pad = width,
-                    Align::Center => {
-                        pad = width / 2;
-                        write_char(s, fill, pad);
-                        pad += width % 2;
+            Some(mut width) => {
+                match width > len {
+                    true => match self.align {
+                        Align::Left => pad = width - len,
+                        Align::Center => {
+                            width = width - len;
+                            pad = width / 2;
+                            write_char(s, fill, pad);
+                            pad += width % 2;
+                        },
+                        Align::Right | Align::None => {
+                            write_char(s, fill, width - len);
+                        },
                     },
-                    Align::Right | Align::None => {
-                        pad = width;
-                    },
+                    // width is greater than length, padding not possible but
+                    // precision still is.
+                    // luckily, the align marker is ignored in this case.
+                    false => precision = self.precision,
                 }
             },
             None => {
                 // no alignment, precision setting is possible
                 match self.precision {
-                    Some(prec) => {
-                        let n = write_from(s, &mut value, prec);
-                        if n < prec {
-                            // only write more if align == Left
-                            match self.align {
-                                Align::Left => pad = prec - n,
-                                _ => return true, // wrote all characters
-                            }
-                        }
-                        else {
-                            return true; // precision has written maximum characters
-                        }
-                    },
+                    Some(prec) => precision = Some(prec),
+
                     None => {}, // no special settings
                 }
             },
         }
+        // deal with precision variable
+        match precision {
+            Some(prec) => {
+                let n = write_from(s, &mut value, prec);
+                if n < prec {
+                    // only write more if align == Left
+                    match self.align {
+                        Align::Left => pad = prec - n,
+                        _ => return true, // wrote all characters
+                    }
+                }
+                else {
+                    return true; // precision has written maximum characters
+                }
+            },
+            None => {}
+        }
+
         // Done reading settings, now just write and then pad
         s.extend(value);
         write_char(s, fill, pad);
@@ -113,9 +128,10 @@ impl<'a> Fmt <'a> {
 
 
 #[test]
-fn test_fmt () {
+fn test_fmt_align () {
     let mut vars: HashMap<String, String> = HashMap::new();
     vars.insert("x".to_string(), "X".to_string());
+    vars.insert("long".to_string(), "tooooloong".to_string());
 
     let mut fmt = Fmt{
         identifier: "x",
@@ -125,12 +141,60 @@ fn test_fmt () {
         precision: None,
     };
 
+    // test basic
     let mut s = String::new();
     fmt.write(&mut s, &vars);
+    println!("out: {:?}", s);
     assert!(s == "X");
 
+    // test alignment
     s.clear();
-    f.width = 5;
+    fmt.width = Some(5);
     fmt.write(&mut s, &vars);
+    println!("out: {:?}", s);
     assert!(s == "    X");
+
+    s.clear();
+    fmt.align = Align::Right;
+    fmt.write(&mut s, &vars);
+    println!("out: {:?}", s);
+    assert!(s == "    X");
+
+    s.clear();
+    fmt.align = Align::Center;
+    fmt.write(&mut s, &vars);
+    println!("out: {:?}", s);
+    assert!(s == "  X  ");
+
+    s.clear();
+    fmt.align = Align::Left;
+    fmt.write(&mut s, &vars);
+    println!("out: {:?}", s);
+    assert!(s == "X    ");
+
+    // more center tests
+    s.clear();
+    fmt.align = Align::Center;
+    fmt.width = Some(6);
+    fmt.write(&mut s, &vars);
+    println!("out: {:?}", s);
+    assert!(s == "  X   ");
+
+    // with precision
+
+    // normally is ignored
+    s.clear();
+    fmt.width = Some(5);
+    fmt.align = Align::None;
+    fmt.precision = Some(6);
+    fmt.write(&mut s, &vars);
+    println!("out: {:?}", s);
+    assert!(s == "    X");
+
+    // unless width is < len
+    s.clear();
+    fmt.identifier = "long";
+    fmt.write(&mut s, &vars);
+    println!("out: {:?}", s);
+    assert!(s == "tooool");
 }

@@ -11,7 +11,7 @@ format := '{' argument [ ':' format_spec ] '}'  # does not support empty `{}`
 argument := identifier  # does not support: integer
 
 # format_spec does not support: sign, '#', 0, '.' precision or type
-format_spec := [[fill]align][width]
+format_spec := [[fill]align][width][. precision]
 fill := character
 align := '<' | '^' | '>'
 width := count

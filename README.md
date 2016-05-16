@@ -25,11 +25,11 @@ no more!
 ## Scope
 
 **strfmt** aims to support all of the formatting options defined in
-[`std::fmt`](https://doc.rust-lang.org/std/fmt/) that are useful for 
-formatting strings and none of the options that are not useful for 
+[`std::fmt`](https://doc.rust-lang.org/std/fmt/) that are useful for
+formatting strings and none of the options that are not useful for
 formatting strings.
 
-Items in the stdlib [syntax](https://doc.rust-lang.org/std/fmt/#syntax) that 
+Items in the stdlib [syntax](https://doc.rust-lang.org/std/fmt/#syntax) that
 strfmt will support (with comments on what isn't supported) are:
 ```
 format_string := <text> [ format <text> ] *

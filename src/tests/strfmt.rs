@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use test::Bencher;
 use super::super::{strfmt, Fmt};
 
 #[test]
@@ -33,13 +34,21 @@ fn test_values() {
         ("{long:<5.7}", "toooloo", false),
         ("{long:^5.7}", "toooloo", false),
         ("{long:<}", &too_long, false),
+        ("{long:<<}", &too_long, false),
+        ("{long:<<5}", &too_long, false),
 
         // fun
         ("{x:<>}", "X", false),
         ("{x:<>3}", "<<X", false),
+        ("{{}}", "{{}}", false),
+        ("{{{x}}}", "{{X}}", false),
+        ("{{{x}{{{{{{", "{{X{{{{{{", false),
+        ("{x}}}}", "X}}}", false),
 
         // invalid
         ("{}", "", true),
+        ("{:3}", "", true),
+        ("{x:*}", "", true),
         ("{x::}", "", true),
         ("{x:<<<}", "", true),
         ("{xxx:  <88.3}", "", true),
@@ -76,3 +85,14 @@ fn test_values() {
         }
     }
 }
+
+
+// #[bench]
+// fn bench_strfmt(b: &mut Bencher) {
+//     let mut vars: HashMap<String, String> = HashMap::new();
+//     let too_long = "toooloooong".to_string();
+//     vars.insert("x".to_string(), "X".to_string());
+//     let fmtstr = "short: {x:*^10.3} long: {long:%<14.9}";
+//     b.iter(|| strfmt(fmtstr, &vars));
+// }
+

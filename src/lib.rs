@@ -1,3 +1,7 @@
+// #![feature(test)]
+// #[cfg_attr(test, feature(test))]
+// extern crate test;
+
 // use std::io::Write;
 use std::fmt::Write;
 use std::iter::Iterator;

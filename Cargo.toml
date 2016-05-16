@@ -1,7 +1,12 @@
 [package]
-name = "fmtstr"
+name = "strfmt"
 version = "0.1.0"
-authors = ["Garrett Berg <googberg@gmail.com>"]
+description = "strfmt: rust library for formatting dynamic strings"
+repository = "https://github.com/vitiral/strfmt"
+readme = "README.md"
+keywords = ["format", "string", "str", "dynamic", "static"]
+authors = ["Garrett Berg <vitiral@gmail.com>"]
+license = "MIT"
 
 [dependencies]
 regex = "0.1"

@@ -15,7 +15,7 @@ mod tests;
 lazy_static!{
     pub static ref FMT_PAT: Regex = Regex::new(
 //        1-ident 2-fill 3-align 4-width  5-precision
-        r"(\w+)(?::?(.)?([<>^])?([\d]+)?(?:\.([\d]+))?)").unwrap();
+        r"([\w\d-_]+)(?::?(.)?([<>^])?([\d]+)?(?:\.([\d]+))?)").unwrap();
 // if align doesn't exist, width == fill + width
 }
 

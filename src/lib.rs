@@ -15,7 +15,7 @@ mod tests;
 lazy_static!{
     pub static ref FMT_PAT: Regex = Regex::new(
 //        1-ident 2-fill 3-align 4-width  5-precision
-        r"(\w+)(?::?(.)?([<>^])?([\d]+)?(?:.([\d]+))?)").unwrap();
+        r"(\w+)(?::?(.)?([<>^])?([\d]+)?(?:\.([\d]+))?)").unwrap();
 // if align doesn't exist, width == fill + width
 }
 
@@ -127,7 +127,7 @@ impl<'a> Fmt<'a> {
         }
 
         let fake_width: Option<&str> = captures.at(4);
-        let fake_precision: Option<&str> = captures.at(4);
+        let fake_precision: Option<&str> = captures.at(5);
 
         // we know that align is None
 
@@ -156,13 +156,13 @@ impl<'a> Fmt<'a> {
         }
         // now we know that width == fake_fill + fake_width
         let mut wstr = String::new();
-        wstr.write_str(fake_fill);
+        wstr.write_str(fake_fill).unwrap();
         if fake_width != None {
-            wstr.write_str(fake_width.unwrap());
+            wstr.write_str(fake_width.unwrap()).unwrap();
         }
         out.width = match wstr.parse::<usize>() {
             Ok(w) => Some(w),
-            Err(e) => return Err("invalid width: must be an int".to_string()),
+            Err(_) => return Err("invalid width: must be an int".to_string()),
         };
         out.precision = match fake_precision {
             None => None,

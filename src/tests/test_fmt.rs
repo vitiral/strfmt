@@ -99,14 +99,20 @@ fn test_fmt_from_str() {
     println!("result: {:?}", result);
     assert!(result == expected);
 
-    expected.precision = Some(5);
-    expected.width = Some(33);
-    expected.align = Align::None;
+    expected = Fmt {
+        identifier: "x",
+        fill: None,
+        align: Align::None,
+        width: Some(33),
+        precision: Some(5),
+    };
     result = Fmt::from_str("x:33.5").unwrap();
     println!("result: {:?}", result);
     assert!(result == expected);
 
     assert!(Fmt::from_str("{x:<.3}").is_ok());
+    assert!(Fmt::from_str("{x:^.3}").is_ok());
     assert!(Fmt::from_str("{xxx: <88.3}").is_ok());
     assert!(Fmt::from_str("{xxx:  <88.3}").is_err());
+    assert!(Fmt::from_str("{xxx:a34}").is_err());
 }

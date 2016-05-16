@@ -1,6 +1,5 @@
 // use std::io::Write;
 use std::fmt::Write;
-use std::str;
 use std::iter::Iterator;
 use std::collections::HashMap;
 use std::string::String;
@@ -10,6 +9,7 @@ extern crate regex;
 extern crate lazy_static;
 use regex::Regex;
 
+#[cfg(test)]
 mod tests;
 
 lazy_static!{
@@ -184,7 +184,6 @@ impl<'a> Fmt<'a> {
         };
         let len = value.len();
         let mut value = value.chars();
-        let mut written: usize = 0;
         let mut pad: usize = 0;
         let fill = self.fill.unwrap_or(' ');
         let mut precision: Option<usize> = None;
@@ -242,4 +241,60 @@ impl<'a> Fmt<'a> {
         write_char(s, fill, pad);
         true
     }
+}
+
+/// rust-style format a string given a HashMap of the variables
+pub fn strfmt(fmtstr: &str, vars: &HashMap<String, String>) -> Result<String, FmtError> {
+    let mut out = String::with_capacity(fmtstr.len() * 2);
+    let mut bytes_read: usize = 0;
+    let mut opening_brace: usize = 0;
+    let mut reading_fmt = false;
+    let mut remaining = fmtstr;
+    for c in fmtstr.chars() {
+        bytes_read += c.len_utf8();
+        if c == '{' {
+            if reading_fmt && opening_brace == bytes_read - 1 {
+                // found {{
+                out.push(c);
+                out.push(c);
+                reading_fmt = false;
+            } else if !reading_fmt {
+                // found a first {
+                reading_fmt = true;
+                opening_brace = bytes_read - 1;
+            } else {
+                // found a { after finding an opening brace, error!
+                out.clear();
+                out.write_str("extra { found").unwrap();
+                return Err(FmtError(out));
+            }
+        } else if c == '}' {
+            if !reading_fmt {
+                out.push(c); // extra '}' found, ignore
+            } else {
+                // discard before opening brace
+                let (_, r) = remaining.split_at(opening_brace);
+                let (fmt_pattern, r) = r.split_at(bytes_read - opening_brace);
+                remaining = r;
+                // use the Fmt object to write the formatted string
+                match Fmt::from_str(fmt_pattern) {
+                    Ok(fmt) => {
+                        match fmt.write(&mut out, vars) {
+                            true => {}
+                            false => {
+                                return Err(FmtError(out));
+                            }
+                        }
+                    }
+                    Err(err) => return Err(FmtError(err)),
+                };
+                reading_fmt = false;
+                bytes_read = 0;
+            }
+        } else if !reading_fmt {
+            out.push(c)
+        } // else we are currently reading a format string, so don't push
+    }
+    out.shrink_to_fit();
+    Ok(out)
 }

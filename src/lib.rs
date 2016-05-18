@@ -3,6 +3,8 @@
 // extern crate test;
 
 // use std::io::Write;
+use std::fmt;
+use std::error;
 use std::fmt::Write;
 use std::iter::Iterator;
 use std::collections::HashMap;
@@ -34,7 +36,23 @@ enum Align {
 #[derive(Debug, PartialEq)]
 pub struct FmtError(String);
 
-/// LOC-fmtu
+impl fmt::Display for FmtError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "FmtError({:?})", self.0)
+    }
+}
+
+impl error::Error for FmtError {
+    fn description(&self) -> &str {
+        "fmt error"
+    }
+
+    fn cause(&self) -> Option<&error::Error> {
+        None
+    }
+}
+
+/// LOC-error
 #[derive(Debug, PartialEq)]
 struct Fmt<'a> {
     pub identifier: &'a str,

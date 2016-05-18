@@ -56,3 +56,10 @@ a string and have a method that accepts the map to format
 The `Fmt` struct **will** be the primary workhorse of actually
 formatting the string
 ```
+
+[SPC-errors]
+loc = "LOC-error: {lib}"
+text = '''
+any errors on formatting a string **shall** result in a returned
+error object
+'''

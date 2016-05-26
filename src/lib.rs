@@ -257,12 +257,12 @@ pub fn strfmt(fmtstr: &str, vars: &HashMap<String, String>) -> Result<String, Fm
     let mut opening_brace: usize = 0;
     let mut reading_fmt = false;
     let mut remaining = fmtstr;
+    let mut last_was_discarded_brace = false;
     for c in fmtstr.chars() {
         bytes_read += c.len_utf8();
         if c == '{' {
             if reading_fmt && opening_brace == bytes_read - 2 {
                 // found {{
-                out.push(c);
                 out.push(c);
                 reading_fmt = false;
             } else if !reading_fmt {
@@ -277,7 +277,12 @@ pub fn strfmt(fmtstr: &str, vars: &HashMap<String, String>) -> Result<String, Fm
             }
         } else if c == '}' {
             if !reading_fmt {
-                out.push(c); // extra '}' found, ignore
+                if !last_was_discarded_brace {
+                    out.push(c); // extra '}' found, ignore
+                    last_was_discarded_brace = true;
+                } else {
+                    last_was_discarded_brace = false;
+                }
             } else {
                 // discard before opening brace
                 // println!(" - remaining before: {:?}", remaining);
@@ -306,6 +311,7 @@ pub fn strfmt(fmtstr: &str, vars: &HashMap<String, String>) -> Result<String, Fm
                 };
                 reading_fmt = false;
                 bytes_read = 0;
+                last_was_discarded_brace = false;
             }
         } else if !reading_fmt {
             out.push(c)

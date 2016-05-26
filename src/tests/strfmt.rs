@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use super::super::{strfmt, Fmt};
+use super::super::strfmt;
 
 #[test]
 fn test_values() {

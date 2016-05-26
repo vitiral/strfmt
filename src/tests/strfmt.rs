@@ -51,6 +51,11 @@ fn test_values() {
         ("{x::}", "", true),
         ("{x:<<<}", "", true),
         ("{xxx:  <88.3}", "", true),
+
+        // escape
+        ("{{}}", "{}", false),
+        ("{{long}}", "{long}", false),
+        ("{{{x}}}", "{X}", false),
     ];
 
     for (fmtstr, expected, expect_err) in values {

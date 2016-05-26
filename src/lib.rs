@@ -255,9 +255,9 @@ pub fn strfmt(fmtstr: &str, vars: &HashMap<String, String>) -> Result<String, Fm
     let mut out = String::with_capacity(fmtstr.len() * 2);
     let mut bytes_read: usize = 0;
     let mut opening_brace: usize = 0;
+    let mut closing_brace: bool = false;
     let mut reading_fmt = false;
     let mut remaining = fmtstr;
-    let mut last_was_discarded_brace = false;
     for c in fmtstr.chars() {
         bytes_read += c.len_utf8();
         if c == '{' {
@@ -276,14 +276,15 @@ pub fn strfmt(fmtstr: &str, vars: &HashMap<String, String>) -> Result<String, Fm
                 return Err(FmtError(out));
             }
         } else if c == '}' {
-            if !reading_fmt {
-                if !last_was_discarded_brace {
-                    out.push(c); // extra '}' found, ignore
-                    last_was_discarded_brace = true;
-                } else {
-                    last_was_discarded_brace = false;
-                }
+            if !reading_fmt && !closing_brace {
+                // found a '}' that isn't after a '{'
+                closing_brace = true;
+            } else if closing_brace {
+                // found "}}"
+                out.push(c);
+                closing_brace = false;
             } else {
+                // found a format string
                 // discard before opening brace
                 // println!(" - remaining before: {:?}", remaining);
                 let (_, r) = remaining.split_at(opening_brace);
@@ -311,11 +312,17 @@ pub fn strfmt(fmtstr: &str, vars: &HashMap<String, String>) -> Result<String, Fm
                 };
                 reading_fmt = false;
                 bytes_read = 0;
-                last_was_discarded_brace = false;
             }
+        } else if closing_brace {
+            return Err(FmtError("Single '}' encountered in format string".to_string()));
         } else if !reading_fmt {
             out.push(c)
         } // else we are currently reading a format string, so don't push
+    }
+    if closing_brace {
+        return Err(FmtError("Single '}' encountered in format string".to_string()));
+    } else if reading_fmt {
+        return Err(FmtError("Expected '}' before end of string".to_string()));
     }
     out.shrink_to_fit();
     Ok(out)

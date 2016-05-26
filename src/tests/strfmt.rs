@@ -42,7 +42,7 @@ fn test_values() {
         ("{{}}", "{}", false),
         ("{{{x}}}", "{X}", false),
         ("{{{x}{{{{{{", "{X{{{", false),
-        ("{x}}}}", "X}}", false),
+        ("{x}}}}}", "X}}", false),
 
         // invalid
         ("{}", "", true),
@@ -51,39 +51,32 @@ fn test_values() {
         ("{x::}", "", true),
         ("{x:<<<}", "", true),
         ("{xxx:  <88.3}", "", true),
+        ("}", "", true),
+        ("{{}}}", "", true),
+        ("hi } there", "", true),
+        ("hi }", "", true),
+        ("w { ho", "", true),
 
         // escape
         ("{{}}", "{}", false),
         ("{{long}}", "{long}", false),
         ("{{{x}}}", "{X}", false),
+
+        // escape errors
     ];
 
     for (fmtstr, expected, expect_err) in values {
         let result = strfmt(fmtstr, &vars);
-        let mut err = expect_err != result.is_err();
-        if !err && !expect_err {
-            err = match &result {
-                &Ok(ref r) => r != expected,
-                _ => unreachable!(),
-            };
-        }
+        let failure = expect_err != result.is_err();
 
-        if err {
-            let ex_type = if expect_err {
-                "fail"
+        if failure {
+            println!("FAIL:");
+            println!("     input: {:?}", (fmtstr, expected, expect_err));
+            println!("    output: {:?}", result);
+            if expect_err {
+                println!("    expected: error");
             } else {
-                "pass"
-            };
-            let fmt = Fmt::from_str(fmtstr);
-            println!("FAIL: expected {}", ex_type);
-            println!("    input: {:?}", (fmtstr, expected, expect_err));
-            println!("    fmt: {:?}", fmt);
-            if !expect_err {
-                          println!("    expected: {:?}", expected);
-            }
-            match result {
-                Ok(v) =>  println!("         got: {:?}", v),
-                Err(v) => println!("         got: {:?}", v),
+                println!("    expected: {:?}", expected);
             }
             assert!(false);
         }

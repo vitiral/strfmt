@@ -1,5 +1,6 @@
 mod fmt;
 mod strfmt;
+mod test_trait;
 
 use super::{FmtError};
 

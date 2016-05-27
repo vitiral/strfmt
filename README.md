@@ -16,8 +16,15 @@ fn it_works() {
     vars.insert("job".to_string(), "python developer".to_string());
 
     let fmt = "hi, my name is {name} and I am a {job}!".to_string();
-    assert!(strfmt(&fmt, &vars).unwrap() == "hi, my name is bob and I am a python developer!")
+    assert_eq!(strfmt(&fmt, &vars).unwrap(), "hi, my name is bob and I am a python developer!")
 }
+```
+
+In addition to the `strfmt` function, this library has the `Format` trait which adds the
+`format` method to `str` and `String` types.
+
+```
+assert_eq!("hi, my name is {name}".format(&vars), "hi, my name is bob")
 ```
 
 You can use this library any time you have dynamic strings you want to format, such as

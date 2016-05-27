@@ -17,35 +17,35 @@ fn test_fmt_align() {
 
     // test basic
     let mut s = String::new();
-    fmt.write(&mut s, &vars);
+    fmt.write(&mut s, &vars).unwrap();
     assert!(s == "X");
 
     // test alignment
     s.clear();
     fmt.width = Some(5);
-    fmt.write(&mut s, &vars);
+    fmt.write(&mut s, &vars).unwrap();
     assert!(s == "    X");
 
     s.clear();
     fmt.align = Align::Right;
-    fmt.write(&mut s, &vars);
+    fmt.write(&mut s, &vars).unwrap();
     assert!(s == "    X");
 
     s.clear();
     fmt.align = Align::Center;
-    fmt.write(&mut s, &vars);
+    fmt.write(&mut s, &vars).unwrap();
     assert!(s == "  X  ");
 
     s.clear();
     fmt.align = Align::Left;
-    fmt.write(&mut s, &vars);
+    fmt.write(&mut s, &vars).unwrap();
     assert!(s == "X    ");
 
     // more center tests
     s.clear();
     fmt.align = Align::Center;
     fmt.width = Some(6);
-    fmt.write(&mut s, &vars);
+    fmt.write(&mut s, &vars).unwrap();
     assert!(s == "  X   ");
 
     // with precision
@@ -55,13 +55,13 @@ fn test_fmt_align() {
     fmt.width = Some(5);
     fmt.align = Align::None;
     fmt.precision = Some(6);
-    fmt.write(&mut s, &vars);
+    fmt.write(&mut s, &vars).unwrap();
     assert!(s == "    X");
 
     // unless width is < len
     s.clear();
     fmt.identifier = "long";
-    fmt.write(&mut s, &vars);
+    fmt.write(&mut s, &vars).unwrap();
     assert!(s == "tooool");
 }
 

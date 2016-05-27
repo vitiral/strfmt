@@ -38,13 +38,20 @@ This library **shall** run as fast as possible and with as little
 memory as possible
 '''
 
+[REQ-trait]
+text = '''
+This library **shall** export `Format` traits so that all supported
+types can use the `format` method.
+'''
+
 [SPC-strfmt]
 partof = "REQ-purpose"
 text = '''
 there **shall** be a public function that accepts a string to
 format and a `HashMap<String, String>` to use as values.
 
-It will format the values according to 
+It will format the values according to the standard in rust's
+std::fmt module.
 '''
 
 [SPC-fmt]

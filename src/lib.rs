@@ -9,6 +9,7 @@ use std::fmt::Write;
 use std::iter::Iterator;
 use std::collections::HashMap;
 use std::string::String;
+use std::result;
 
 extern crate regex;
 #[macro_use]
@@ -34,17 +35,28 @@ enum Align {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct FmtError(String);
+pub enum FmtError {
+    Invalid(String),  // format string is structued incorrectly
+    KeyError(String), // key error in formatting string
+}
+
+pub type Result<T> = result::Result<T, FmtError>;
 
 impl fmt::Display for FmtError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "FmtError({:?})", self.0)
+        match self {
+            &FmtError::Invalid(ref s) => write!(f, "Invalid({})", s),
+            &FmtError::KeyError(ref s) => write!(f, "KeyError({})", s),
+        }
     }
 }
 
 impl error::Error for FmtError {
     fn description(&self) -> &str {
-        "fmt error"
+        match self {
+            &FmtError::Invalid(_) => "invalid format string",
+            &FmtError::KeyError(_) => "invalid key",
+        }
     }
 
     fn cause(&self) -> Option<&error::Error> {
@@ -108,14 +120,14 @@ fn test_write_from() {
 
 impl<'a> Fmt<'a> {
     /// create Fmt from format string
-    pub fn from_str(fmt: &'a str) -> Result<Fmt, String> {
+    pub fn from_str(fmt: &'a str) -> Result<Fmt> {
         let captures = match FMT_PAT.captures(fmt) {
-            None => return Err("Invalid format string".to_string()),
+            None => return Err(FmtError::Invalid("Invalid format string".to_string())),
             Some(c) => c,
         };
         // println!("captures: {:?}", captures);
         let mut out = Fmt {
-            identifier: captures.at(1).unwrap(), // not optional==unwrap
+            identifier: captures.at(1).unwrap(),
             fill: None,
             align: Align::None,
             width: None,
@@ -185,7 +197,7 @@ impl<'a> Fmt<'a> {
         }
         out.width = match wstr.parse::<usize>() {
             Ok(w) => Some(w),
-            Err(_) => return Err("invalid width: must be an int".to_string()),
+            Err(_) => return Err(FmtError::Invalid("width: must be an int".to_string())),
         };
         out.precision = match fake_precision {
             None => None,
@@ -196,14 +208,12 @@ impl<'a> Fmt<'a> {
 
     /// write the formatted string to `s` and return true. If there is an error: clear `s`,
     /// write the error and return false
-    pub fn write(&self, s: &mut String, vars: &'a HashMap<String, String>) -> bool {
+    pub fn write(&self, s: &mut String, vars: &'a HashMap<String, String>) -> Result<()> {
         // println!("- writting...");
         let ref value = match vars.get(self.identifier) {
             Some(v) => v,
             None => {
-                s.clear();
-                write!(s, "invalid identifier: {}", self.identifier).unwrap();
-                return false;
+                return Err(FmtError::KeyError(self.identifier.to_string()));
             }
         };
         let len = match self.precision {
@@ -246,12 +256,19 @@ impl<'a> Fmt<'a> {
             write_from(s, &mut value, self.precision.unwrap());
         }
         write_char(s, fill, pad);
-        true
+        Ok(())
     }
 }
 
 /// rust-style format a string given a HashMap of the variables
-pub fn strfmt(fmtstr: &str, vars: &HashMap<String, String>) -> Result<String, FmtError> {
+pub fn strfmt(fmtstr: &str, vars: &HashMap<String, String>) -> Result<String> {
+    strfmt_options(fmtstr, vars, false)
+}
+
+/// UNSTABLE: rust-style format a string given a HashMap of the variables and additional options
+/// variables:
+///   ignore_missing: if true, ignore missing variables
+pub fn strfmt_options(fmtstr: &str, vars: &HashMap<String, String>, ignore_missing: bool) -> Result<String> {
     let mut out = String::with_capacity(fmtstr.len() * 2);
     let mut bytes_read: usize = 0;
     let mut opening_brace: usize = 0;
@@ -273,7 +290,7 @@ pub fn strfmt(fmtstr: &str, vars: &HashMap<String, String>) -> Result<String, Fm
                 // found a { after finding an opening brace, error!
                 out.clear();
                 out.write_str("extra { found").unwrap();
-                return Err(FmtError(out));
+                return Err(FmtError::Invalid(out));
             }
         } else if c == '}' {
             if !reading_fmt && !closing_brace {
@@ -299,30 +316,27 @@ pub fn strfmt(fmtstr: &str, vars: &HashMap<String, String>) -> Result<String, Fm
                 // println!(" - pattern found: {:?}", fmt_pattern);
                 // println!(" - remaining after: {:?}", remaining);
                 // use the Fmt object to write the formatted string
-                match Fmt::from_str(fmt_pattern) {
-                    Ok(fmt) => {
-                        match fmt.write(&mut out, vars) {
-                            true => {}
-                            false => {
-                                return Err(FmtError(out));
-                            }
-                        }
+                let fmt = try!(Fmt::from_str(fmt_pattern));
+                match fmt.write(&mut out, vars) {
+                    Ok(_) => {},
+                    Err(err) => match ignore_missing {
+                        true => write!(out, "{{{}}}", fmt_pattern).unwrap(),
+                        false => return Err(err),
                     }
-                    Err(err) => return Err(FmtError(err)),
-                };
+                }
                 reading_fmt = false;
                 bytes_read = 0;
             }
         } else if closing_brace {
-            return Err(FmtError("Single '}' encountered in format string".to_string()));
+            return Err(FmtError::Invalid("Single '}' encountered in format string".to_string()));
         } else if !reading_fmt {
             out.push(c)
         } // else we are currently reading a format string, so don't push
     }
     if closing_brace {
-        return Err(FmtError("Single '}' encountered in format string".to_string()));
+        return Err(FmtError::Invalid("Single '}' encountered in format string".to_string()));
     } else if reading_fmt {
-        return Err(FmtError("Expected '}' before end of string".to_string()));
+        return Err(FmtError::Invalid("Expected '}' before end of string".to_string()));
     }
     out.shrink_to_fit();
     Ok(out)

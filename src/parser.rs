@@ -270,7 +270,7 @@ fn parse_like_python(rest: &str) -> Result<FmtPy> {
 impl<'a> FmtChunk<'a> {
     /// create FmtChunk from format string
     pub fn from_str(s: &'a str) -> Result<FmtChunk> {
-        let mut done = false;
+        let mut found_colon = false;
         let mut chars = s.chars();
         let mut c = match chars.next() {
             Some(':') | None => return Err(
@@ -282,18 +282,24 @@ impl<'a> FmtChunk<'a> {
         loop {
             consumed += c.len_utf8();
             if c == ':' {
+                found_colon = true;
                 break;
             }
             c = match chars.next() {
                 Some(c) => c,
                 None => {
-                    done = true;
                     break;
                 }
             };
         }
         let (identifier, rest) = s.split_at(consumed);
-        let (identifier, _) = identifier.split_at(identifier.len() - 1); // get rid of ':'
+        println!("iden: {:?} rest: {:?}", identifier, rest);
+        let identifier = if found_colon {
+            let (i, _) = identifier.split_at(identifier.len() - 1); // get rid of ':'
+            i
+        } else {
+            identifier
+        };
 
         let format = try!(parse_like_python(rest));
 

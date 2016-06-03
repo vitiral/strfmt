@@ -4,19 +4,10 @@ refs = ["{repo}/README.md"]
 
 [REQ-syntax]
 text = '''
-the following syntax will be used (comments on how it differs from rust's)
-```
-format_string := <text> [ format <text> ] *
-format := '{' argument [ ':' format_spec ] '}'  # does not support empty `{}`
-argument := identifier  # does not support: integer
+The format string will follow python's exactly.
 
-# format_spec does not support: sign, '#', 0, '.' precision or type
-format_spec := [[fill]align][width]
-fill := character
-align := '<' | '^' | '>'
-width := count
-precision := count
-```
+This is to get away from the `#` and extra `0` formats that are there for
+almost no reason.
 '''
 
 [REQ-syntax-ineractions]

@@ -11,8 +11,10 @@ fn test_fmt_align() {
         identifier: "x",
         fill: None,
         align: Align::None,
+        sign: None,
         width: None,
         precision: None,
+        ty: None,
     };
 
     // test basic
@@ -72,8 +74,10 @@ fn test_fmt_from_str() {
         identifier: "x",
         fill: None,
         align: Align::None,
+        sign: None,
         width: None,
         precision: None,
+        ty: None,
     };
     let mut result: FmtChunk;
     assert!(FmtChunk::from_str("x").unwrap() == expected);
@@ -93,8 +97,10 @@ fn test_fmt_from_str() {
         identifier: "x",
         fill: None,
         align: Align::None,
+        sign: None,
         width: Some(33),
         precision: Some(5),
+        ty: None,
     };
     result = FmtChunk::from_str("x:33.5").unwrap();
     assert!(result == expected);

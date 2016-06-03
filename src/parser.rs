@@ -9,8 +9,11 @@ use types::*;
 
 lazy_static!{
     pub static ref FMT_PAT: Regex = Regex::new(
-//        1-ident 2-fill 3-align 4-width  5-precision
-        r"^([\w\d-_]+)(?::(.)?([<>^])?([\d]+)?(?:\.([\d]+))?)?\z").unwrap();
+//          1-ident    2-fill 3-align 4-sign  5-width   6-precision    7-type
+        r"^([\w\d-_]+)(?::(.)?([<>^])?([+-])?([([\d]+)?(?:\.([\d]+))?([sbcdoxXneEfFgG%])?)?\z")
+        .unwrap();
+//          1-ident    2-fill 3-align 4-width  5-precision
+    // r"^([\w\d-_]+)(?::(.)?([<>^])?([\d]+)?(?:\.([\d]+))?)?\z").unwrap();
 // if align doesn't exist, width == fill + width
 }
 
@@ -59,92 +62,202 @@ fn test_write_from() {
     assert!(s == "h fffxx333");
 }
 
+fn is_alignment_token(c: char) {
+    match c {
+        '=' | '<' | '^' | '>' => true,
+        _ => false,
+    }
+}
+
+fn is_sign_element(c: char) {
+    match c {
+        ' ' | '-' | '+' => true,
+        _ => false,
+    }
+}
+
+// get an integer from pos, returning the number of bytes
+// consumed and the integer
+fn get_integer(s: &str, pos: usize) -> (usize, Option<usize>) {
+    let _, rest = s.split_at(pos);
+    let mut consumed: usize = 0;
+    for c in rest.chars() {
+        match c {
+            '0'...'9' => {},
+            _ => break;
+        };
+        consumed += 1;
+    }
+    if consumed == 0 {
+        (0, None);
+    } else {
+        let intstr, _ = rest.split_at(consumed);
+        (consumed, intstr::parse<i64>())
+    }
+}
+
 
 impl<'a> FmtChunk<'a> {
     /// create FmtChunk from format string
-    pub fn from_str(fmt: &'a str) -> Result<FmtChunk> {
-        let captures = match FMT_PAT.captures(fmt) {
-            None => return Err(FmtError::Invalid("Invalid format string".to_string())),
+    pub fn from_str(s: &'a str) -> Result<FmtChunk> {
+        let mut done = false;
+        let mut chars = s.chars();
+        let mut c = match chars.next() {
+            Some(':') | None => return Err(
+                FmtError::Invalid("must specify identifier".to_string()));
             Some(c) => c,
         };
-        let mut out = FmtChunk {
-            identifier: captures.at(1).unwrap(),
-            fill: None,
-            align: Align::None,
-            width: None,
-            precision: None,
-        };
-
-        let fake_fill = match captures.at(2) {
-            None => return Ok(out), // no characters after ':', just return
-            Some(f) => f,
-        };
-
-        out.align = match captures.at(3) {
-            None => Align::None,
-            Some("<") => Align::Left,
-            Some("^") => Align::Center,
-            Some(">") => Align::Right,
-            _ => unreachable!(),
-        };
-
-        if out.align != Align::None {
-            // simple case where everything equals what it should
-            out.fill = Some(fake_fill.chars().next().unwrap());
-            out.width = match captures.at(4) {
-                None => None,
-                Some(width) => Some(width.parse::<usize>().unwrap()),
+        let mut consumed = 0;
+        // find the identifier
+        loop {
+            consumed += c.len_utf8();
+            if c == ':' {
+                break;
+            }
+            c = match chars.next() {
+                Some(c) => c,
+                None => {
+                    done = true;
+                    break;
+                }
             };
-            out.precision = match captures.at(5) {
-                None => None,
-                Some(prec) => Some(prec.parse::<usize>().unwrap()),
-            };
-            return Ok(out);
+        }
+        let (identifier, rest) = s.split_at(consumed);
+        let (identifier, _) = identifier.split_at(identifer.len() - 1); // get rid of ':'
+
+        /* The rest of this was pretty much strait up copied from python's format parser
+            All credit goes to python source file: formatter_unicode.c
+        */
+        let align_specified = false;
+        let fill_specified = false;
+
+        let mut format = FmtChunk {
+            identifier: identifier,
+            fill: ' ',
+            align: '>',
+            sign: '\0',
+            width: -1,
+            thousands: false,
+            precision: -1,
+            ty: 's',
+            alternate: false,
+        };
+        let mut chars = rest.chars();
+        let fake_fill = match chars.next() {
+            Some(c) => c,
+            None => return format,
+        };
+        let _, rest = rest.split_at(fake_fill.len_utf8());
+        // from now on all format characters MUST be valid
+        // ASCII characters (fill and identifier were the
+        // only ones that weren't.
+        // Therefore we can use bytes for the rest
+        let rest = rest.as_ref();
+        let end = rest.len();
+        let pos = 0;
+
+        /* If the second char is an alignment token,
+            then parse the fill char */
+        if end-pos >= 1 && is_alignment_token(rest[0]) {
+            format.align = rest[0];
+            format.fill = fake_fill;
+            fill_specified = true;
+            align_specified = true;
+            pos += 2;
+        } else if end-pos == 0 && is_alignment_token(fake_fill) {
+            format.align = fake_fill;
+            pos+=1;
         }
 
-        let fake_width: Option<&str> = captures.at(4);
-        let fake_precision: Option<&str> = captures.at(5);
+        /* Parse the various sign options */
+        if (end-pos >= 1 && is_sign_element(rest[pos])) {
+            format.sign = rest[pos];
+            pos+=1;
+        }
 
-        // we know that align is None
+        /* If the next character is #, we're in alternate mode.  This only
+            applies to integers. */
+        if (end-pos >= 1 && rest[pos] == '#') {
+            format.alternate = 1;
+            pos+=1;
+        }
 
-        // if width is not none and fill == '.' then precision == width, width == None
-        if fake_width != None && fake_fill == "." {
-            out.precision = Some(fake_width.unwrap().parse::<usize>().unwrap());
-            return Ok(out);
+        /* The special case for 0-padding (backwards compat) */
+        if (!fill_char_specified && end-pos >= 1 && rest[pos] == '0') {
+            format->fill_char = '0';
+            if (!align_specified) {
+                format->align = '=';
+            }
+            ++pos;
         }
-        let fake_align = match fake_fill {
-            "<" => Align::Left,
-            "^" => Align::Center,
-            ">" => Align::Right,
-            _ => Align::None,
-        };
-        if fake_align != Align::None {
-            out.align = fake_align;
-            out.width = match fake_width {
-                None => None,
-                Some(x) => Some(x.parse::<usize>().unwrap()),
-            };
-            out.precision = match fake_precision {
-                None => None,
-                Some(x) => Some(x.parse::<usize>().unwrap()),
-            };
-            return Ok(out);
+
+        // check to make sure that val is good
+        let consumed, val = get_integer(rest, pos);
+        pos += consumed;
+        if consumed != 0 {
+            match val {
+                None => return Err(FmtError("overflow error when parsing width".to_string())),
+                Some(v) => {
+                    format.width = v;
+                }
+            }
         }
-        // now we know that width == fake_fill + fake_width
-        let mut wstr = String::new();
-        wstr.write_str(fake_fill).unwrap();
-        if fake_width != None {
-            wstr.write_str(fake_width.unwrap()).unwrap();
+
+        /* Comma signifies add thousands separators */
+        if (end-pos && rest[pos] == ',') {
+            format->thousands_separators = true;
+            pos+=1;
         }
-        out.width = match wstr.parse::<usize>() {
-            Ok(w) => Some(w),
-            Err(_) => return Err(FmtError::Invalid("width: must be an int".to_string())),
-        };
-        out.precision = match fake_precision {
-            None => None,
-            Some(x) => Some(x.parse::<usize>().unwrap()),
-        };
-        Ok(out)
+
+        /* Parse field precision */
+        if (end-pos && rest[pos] == '.') {
+            pos+=1;
+
+            let consumed, val = get_integer(rest, pos);
+            if consumed != 0 {
+                match val {
+                    None => return Err(FmtError("overflow error when parsing precision"
+                                                .to_string())),
+                    Some(v) => {
+                        format.precision = v;
+                    }
+                }
+            } else {
+                /* Not having a precision after a dot is an error. */
+                if (consumed == 0) {
+                    return Err(FmtError("Format specifier missing precision".to_string()));
+                }
+            }
+
+        }
+
+        /* Finally, parse the type field. */
+        if (end-pos > 1) {
+            /* More than one char remain, invalid format specifier. */
+            return Err(FmtError("Invalid format specifier"));
+        }
+
+        if (end-pos == 1) {
+            format->type = rest[pos];
+            pos+=1;
+        }
+
+        /* Do as much validating as we can, just by looking at the format
+            specifier.  Do not take into account what type of formatting
+            we're doing (int, float, string). */
+        if (format->thousands_separators) {
+            match (format.ty) {
+                'd' | 'e' | 'f' | 'g' | 'E' | 'G' |
+                '%' | 'F' | '\0' => {}, /* These are allowed. See PEP 378.*/
+
+                _ => {
+                    let msg = String::new();
+                    write!(msg, "Invalid comma type: {}", format.ty);
+                    return Err(FmtError(msg));
+                }
+            }
+        }
+        Ok(format)
     }
 
     /// write the formatted string to `s` and return true. If there is an error: clear `s`,

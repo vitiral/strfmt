@@ -44,15 +44,3 @@ impl error::Error for FmtError {
     }
 }
 
-#[derive(Debug, PartialEq)]
-pub struct FmtChunk<'a> {
-    pub identifier: &'a str,
-    pub fill: char,
-    pub align: char,
-    pub alternate: bool,
-    pub sign: char,
-    pub width: i64,
-    pub thousands: bool,
-    pub precision: i64,
-    pub ty: char,
-}

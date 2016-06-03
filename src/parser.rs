@@ -97,7 +97,21 @@ fn get_integer(s: &str, pos: usize) -> (usize, Option<usize>) {
 }
 
 
-impl<'a> FmtChunk<'a> {
+#[derive(Debug)]
+/// The format struct as it is defined in the python source
+pub struct FmtPy<'a> {
+    pub identifier: &'a str,
+    pub fill: char,
+    pub align: char,
+    pub alternate: bool,
+    pub sign: char,
+    pub width: i64,
+    pub thousands: bool,
+    pub precision: i64,
+    pub ty: char,
+}
+
+impl<'a> Fmt<'a> {
     /// create FmtChunk from format string
     pub fn from_str(s: &'a str) -> Result<FmtChunk> {
         let mut done = false;
@@ -135,12 +149,12 @@ impl<'a> FmtChunk<'a> {
             identifier: identifier,
             fill: ' ',
             align: '>',
+            alternate: false,
             sign: '\0',
             width: -1,
             thousands: false,
             precision: -1,
             ty: 's',
-            alternate: false,
         };
         let mut chars = rest.chars();
         let fake_fill = match chars.next() {

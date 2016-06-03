@@ -9,5 +9,3 @@ authors = ["Garrett Berg <vitiral@gmail.com>"]
 license = "MIT"
 
 [dependencies]
-regex = "0.1"
-lazy_static = "0.1.*"

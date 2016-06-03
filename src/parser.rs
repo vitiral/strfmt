@@ -233,7 +233,7 @@ fn parse_like_python(rest: &str) -> Result<FmtPy> {
             write!(msg, "Invalid type specifier: {:?}", format.ty).unwrap();
             return Err(FmtError::Invalid(msg));
         }
-        pos+=1;
+        // pos+=1;
     }
 
     /* Do as much validating as we can, just by looking at the format
@@ -246,7 +246,7 @@ fn parse_like_python(rest: &str) -> Result<FmtPy> {
 
             _ => {
                 let mut msg = String::new();
-                write!(msg, "Invalid comma type: {}", format.ty);
+                write!(msg, "Invalid comma type: {}", format.ty).unwrap();
                 return Err(FmtError::Invalid(msg));
             }
         }

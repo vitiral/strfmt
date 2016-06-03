@@ -1,9 +1,5 @@
 //! strfmt crate
 
-extern crate regex;
-#[macro_use]
-extern crate lazy_static;
-
 use std::collections::HashMap;
 use std::string::String;
 

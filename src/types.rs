@@ -9,8 +9,8 @@ use std::result;
 pub enum Align {
     Left,
     Center,
-    Right,
-    None,
+    Right, // default
+    Equal,
 }
 
 pub type Result<T> = result::Result<T, FmtError>;
@@ -44,3 +44,41 @@ impl error::Error for FmtError {
     }
 }
 
+
+enum Type {
+    // integer types
+    Bin,
+    Char,
+    Decimal,
+    Octal,
+    Hex,
+    HexUpper,
+
+    // both
+    Number,
+
+    // Floating point types
+    Exponent,
+    ExponentUpper,
+    Fixed,
+    General,
+    GeneralUppercase,
+    Percengage,
+
+    // other types
+    None,
+    String,
+    Debug,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct FmtChunk<'a> {
+    pub identifier: &'a str,
+    pub fill: char,
+    pub align: Align,
+    pub alternate: bool,
+    pub width: Option<usize>,
+    pub thousands: bool,
+    pub precision: Option<usize>,
+    pub ty: Option<char>,
+}

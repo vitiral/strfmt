@@ -4,20 +4,7 @@ use std::iter::Iterator;
 use std::collections::HashMap;
 use std::string::String;
 
-use regex::Regex;
-
 use types::*;
-
-lazy_static!{
-    pub static ref FMT_PAT: Regex = Regex::new(
-//          1-ident    2-fill 3-align 4-sign  5-width   6-precision    7-type
-        r"^([\w\d-_]+)(?::(.)?([<>^])?([+-])?([([\d]+)?(?:\.([\d]+))?([sbcdoxXneEfFgG%])?)?\z")
-        .unwrap();
-//          1-ident    2-fill 3-align 4-width  5-precision
-    // r"^([\w\d-_]+)(?::(.)?([<>^])?([\d]+)?(?:\.([\d]+))?)?\z").unwrap();
-// if align doesn't exist, width == fill + width
-}
-
 
 fn write_char(s: &mut String, c: char, n: usize) {
     for _ in 0..n {
@@ -186,7 +173,7 @@ fn parse_like_python(rest: &str) -> Result<FmtPy> {
     /* The special case for 0-padding (backwards compat) */
     if !fill_specified && end-pos >= 1 && rest[pos] == '0' as u8 {
         format.fill = '0';
-        if (!align_specified) {
+        if !align_specified {
             format.align = '=';
         }
         pos+=1;

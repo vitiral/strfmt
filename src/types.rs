@@ -13,6 +13,14 @@ pub enum Alignment {
     Equal,
 }
 
+#[derive(Debug, Clone, PartialEq)]
+pub enum Sign {
+    Unspecified,
+    Plus,
+    Minus,
+    Space,
+}
+
 pub type Result<T> = result::Result<T, FmtError>;
 
 /// LOC-error
@@ -46,7 +54,6 @@ impl error::Error for FmtError {
         None
     }
 }
-
 
 enum Type {
     // integer types

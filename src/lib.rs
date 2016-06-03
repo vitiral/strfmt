@@ -1,5 +1,6 @@
 //! strfmt crate
 
+use std::fmt::Write;
 use std::collections::HashMap;
 use std::string::String;
 
@@ -15,7 +16,18 @@ pub use parser::strfmt_options;
 
 /// rust-style format a string given a HashMap of the variables
 pub fn strfmt(fmtstr: &str, vars: &HashMap<String, String>) -> Result<String> {
-    strfmt_options(fmtstr, vars, false)
+    let formatter = |mut fmt: types::Formatter| {
+        let v = match vars.get(fmt.key) {
+            Some(v) => v,
+            None => {
+                let mut msg = String::new();
+                write!(msg, "Invalid key: {}", fmt.key).unwrap();
+                return Err(FmtError::KeyError(msg));
+            },
+        };
+        fmt.str(v.as_str())
+    };
+    strfmt_options(fmtstr, &formatter)
 }
 
 pub trait Format {

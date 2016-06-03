@@ -85,4 +85,5 @@ pub struct Formatter<'a, 'b> {
     pub precision: Option<usize>,
     pub ty: Option<char>,
     pub buff: &'b mut String,
+    pub pattern: &'a str,
 }

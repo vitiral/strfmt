@@ -271,6 +271,7 @@ impl<'a, 'b> Formatter<'a, 'b> {
                 _ => Some(format.ty),
             },
             buff: buff,
+            pattern: s,
         })
     }
 }
@@ -279,7 +280,9 @@ impl<'a, 'b> Formatter<'a, 'b> {
 /// UNSTABLE: rust-style format a string given a HashMap of the variables and additional options
 /// variables:
 ///   ignore_missing: if true, ignore missing variables
-pub fn strfmt_options(fmtstr: &str, vars: &HashMap<String, String>, ignore_missing: bool) -> Result<String> {
+pub fn strfmt_options<F>(fmtstr: &str, formatter: &F) -> Result<String>
+    where F: Fn(Formatter) -> Result<()>
+{
     let mut out = String::with_capacity(fmtstr.len() * 2);
     let mut bytes_read: usize = 0;
     let mut opening_brace: usize = 0;
@@ -325,23 +328,24 @@ pub fn strfmt_options(fmtstr: &str, vars: &HashMap<String, String>, ignore_missi
                 let (fmt_pattern, _) = fmt_pattern.split_at(fmt_pattern.len() - 1);
                 // use the Formatter object to write the formatted string
                 let mut fmt = try!(Formatter::from_str(fmt_pattern, &mut out));
-                let v = match vars.get(fmt.key) {
-                    Some(v) => v,
-                    None => match ignore_missing {
-                        true => {
-                            write!(fmt.buff, "{{{}}}", fmt_pattern).unwrap();
-                            reading_fmt = false;
-                            bytes_read = 0;
-                            continue;
-                        }
-                        false => {
-                            let mut msg = String::new();
-                            write!(msg, "Invalid key: {}", fmt.key).unwrap();
-                            return Err(FmtError::KeyError(msg));
-                        },
-                    }
-                };
-                try!(fmt.str(v.as_str()));
+                // let v = match vars.get(fmt.key) {
+                //     Some(v) => v,
+                //     None => match ignore_missing {
+                //         true => {
+                //             write!(fmt.buff, "{{{}}}", fmt_pattern).unwrap();
+                //             reading_fmt = false;
+                //             bytes_read = 0;
+                //             continue;
+                //         }
+                //         false => {
+                //             let mut msg = String::new();
+                //             write!(msg, "Invalid key: {}", fmt.key).unwrap();
+                //             return Err(FmtError::KeyError(msg));
+                //         },
+                //     }
+                // };
+                // try!(fmt.str(v.as_str()));
+                try!(formatter(fmt));
                 reading_fmt = false;
                 bytes_read = 0;
             }

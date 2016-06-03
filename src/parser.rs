@@ -146,29 +146,28 @@ fn parse_like_python(rest: &str) -> Result<FmtPy> {
         Some(c) => c,
         None => return Ok(format),
     };
-    let (_, rest) = rest.split_at(fake_fill.len_utf8());
     // from now on all format characters MUST be valid
     // ASCII characters (fill and identifier were the
     // only ones that weren't.
     // Therefore we can use bytes for the rest
+    let rest = rest.as_bytes();
     let mut align_specified = false;
     let mut fill_specified = false;
 
-    let rest = rest.as_bytes();
     let end: usize = rest.len();
     let mut pos: usize = 0;
 
     /* If the second char is an alignment token,
-        then parse the fill char */
-    if end-pos >= 1 && is_alignment_token(rest[0] as char) {
-        format.align = rest[0] as char;
+        then fake_fill as fill */
+    if end-pos >= 1 + fake_fill.len_utf8() && is_alignment_token(rest[pos + fake_fill.len_utf8()] as char) {
+        format.align = rest[pos + fake_fill.len_utf8()] as char;
         format.fill = fake_fill;
         fill_specified = true;
         align_specified = true;
-        pos += 2;
-    } else if end-pos == 0 && is_alignment_token(fake_fill) {
+        pos += 1 + fake_fill.len_utf8();
+    } else if end-pos >= 1 && is_alignment_token(fake_fill) {
         format.align = fake_fill;
-        pos+=1;
+        pos += fake_fill.len_utf8();
     }
 
     /* Parse the various sign options */
@@ -226,10 +225,11 @@ fn parse_like_python(rest: &str) -> Result<FmtPy> {
             }
         } else {
             /* Not having a precision after a dot is an error. */
-            if (consumed == 0) {
+            if consumed == 0 {
                 return Err(FmtError::Invalid("Format specifier missing precision".to_string()));
             }
         }
+        pos += consumed;
 
     }
 

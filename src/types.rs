@@ -20,6 +20,7 @@ pub type Result<T> = result::Result<T, FmtError>;
 pub enum FmtError {
     Invalid(String),  // format string is structued incorrectly
     KeyError(String), // key error in formatting string
+    TypeError(String),     // invalid type used
 }
 
 impl fmt::Display for FmtError {
@@ -27,6 +28,7 @@ impl fmt::Display for FmtError {
         match self {
             &FmtError::Invalid(ref s) => write!(f, "Invalid({})", s),
             &FmtError::KeyError(ref s) => write!(f, "KeyError({})", s),
+            &FmtError::TypeError(ref s) => write!(f, "TypeError({})", s),
         }
     }
 }
@@ -36,6 +38,7 @@ impl error::Error for FmtError {
         match self {
             &FmtError::Invalid(_) => "invalid format string",
             &FmtError::KeyError(_) => "invalid key",
+            &FmtError::TypeError(_) => "error during type resolution",
         }
     }
 
@@ -72,8 +75,8 @@ enum Type {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct FmtChunk<'a> {
-    pub identifier: &'a str,
+pub struct Formatter<'a, 'b> {
+    pub key: &'a str,
     pub fill: char,
     pub align: Align,
     pub alternate: bool,
@@ -81,4 +84,5 @@ pub struct FmtChunk<'a> {
     pub thousands: bool,
     pub precision: Option<usize>,
     pub ty: Option<char>,
+    pub buff: &'b mut String,
 }

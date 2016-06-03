@@ -1,5 +1,5 @@
-use std::collections::HashMap;
-use super::super::types::{Align, FmtChunk};
+// use std::collections::HashMap;
+// use super::super::types::{Align, FmtChunk};
 
 // #[test]
 // fn test_fmt_align() {

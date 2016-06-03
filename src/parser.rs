@@ -6,49 +6,6 @@ use std::string::String;
 
 use types::*;
 
-fn write_char(s: &mut String, c: char, n: usize) {
-    for _ in 0..n {
-        s.push(c);
-    }
-}
-
-#[test]
-fn test_write_char() {
-    let mut s = String::new();
-    s.write_str("h ").unwrap();
-    write_char(&mut s, 'f', 3);
-    assert!(s == "h fff");
-}
-
-fn write_from<'a, I>(s: &mut String, f: I, n: usize) -> usize
-    where I: Iterator<Item = char>
-{
-    // eexaust f or run out of n, return chars written
-    if n == 0 {
-        return 0;
-    }
-    let mut n_written: usize = 0;
-    for c in f {
-        s.push(c);
-        n_written += 1;
-        if n_written == n {
-            return n_written;
-        }
-    }
-    n_written
-}
-
-#[test]
-fn test_write_from() {
-    let mut s = String::new();
-    s.write_str("h ").unwrap();
-    write_from(&mut s, "fff".chars(), 5);
-    assert!(s == "h fff");
-    write_from(&mut s, "xxxx".chars(), 2);
-    assert!(s == "h fffxx");
-    write_from(&mut s, "333".chars(), 3);
-    assert!(s == "h fffxx333");
-}
 
 fn is_alignment_token(c: char) -> bool {
     match c {
@@ -254,9 +211,9 @@ fn parse_like_python(rest: &str) -> Result<FmtPy> {
     Ok(format)
 }
 
-impl<'a> FmtChunk<'a> {
-    /// create FmtChunk from format string
-    pub fn from_str(s: &'a str) -> Result<FmtChunk> {
+impl<'a, 'b> Formatter<'a, 'b> {
+    /// create Formatter from format string
+    pub fn from_str(s: &'a str, buff: &'b mut String) -> Result<Formatter<'a, 'b>> {
         let mut found_colon = false;
         let mut chars = s.chars();
         let mut c = match chars.next() {
@@ -280,7 +237,6 @@ impl<'a> FmtChunk<'a> {
             };
         }
         let (identifier, rest) = s.split_at(consumed);
-        println!("iden: {:?} rest: {:?}", identifier, rest);
         let identifier = if found_colon {
             let (i, _) = identifier.split_at(identifier.len() - 1); // get rid of ':'
             i
@@ -290,8 +246,8 @@ impl<'a> FmtChunk<'a> {
 
         let format = try!(parse_like_python(rest));
 
-        Ok(FmtChunk{
-            identifier: identifier,
+        Ok(Formatter{
+            key: identifier,
             fill: format.fill,
             align: match format.align {
                 '<' => Align::Left,
@@ -314,58 +270,8 @@ impl<'a> FmtChunk<'a> {
                 ' ' => None,
                 _ => Some(format.ty),
             },
+            buff: buff,
         })
-    }
-
-    /// write the formatted string to `s` and return true. If there is an error: clear `s`,
-    /// write the error and return false
-    pub fn write(&self, s: &mut String, vars: &'a HashMap<String, String>) -> Result<()> {
-        let ref value = match vars.get(self.identifier) {
-            Some(v) => v,
-            None => {
-                return Err(FmtError::KeyError(self.identifier.to_string()));
-            }
-        };
-        let len = match self.precision {
-            None => value.len(),
-            Some(p) => {
-                if p < value.len() {
-                    p
-                } else {
-                    value.len()
-                }
-            }
-        };
-        let mut value = value.chars();
-        let mut pad: usize = 0;
-
-        match self.width {
-            Some(mut width) => {
-                if width > len {
-                    match self.align {
-                        Align::Left => pad = width - len,
-                        Align::Center => {
-                            width = width - len;
-                            pad = width / 2;
-                            write_char(s, self.fill, pad);
-                            pad += width % 2;
-                        }
-                        Align::Right => {
-                            write_char(s, self.fill, width - len);
-                        }
-                        Align::Equal => panic!("not yet supported"), // TODO
-                    }
-                }
-            }
-            None => {}
-        }
-        if self.precision.is_none() {
-            s.extend(value);
-        } else {
-            write_from(s, &mut value, self.precision.unwrap());
-        }
-        write_char(s, self.fill, pad);
-        Ok(())
     }
 }
 
@@ -417,15 +323,25 @@ pub fn strfmt_options(fmtstr: &str, vars: &HashMap<String, String>, ignore_missi
                 // discard the braces
                 let (_, fmt_pattern) = fmt_pattern.split_at(1);
                 let (fmt_pattern, _) = fmt_pattern.split_at(fmt_pattern.len() - 1);
-                // use the FmtChunk object to write the formatted string
-                let fmt = try!(FmtChunk::from_str(fmt_pattern));
-                match fmt.write(&mut out, vars) {
-                    Ok(_) => {},
-                    Err(err) => match ignore_missing {
-                        true => write!(out, "{{{}}}", fmt_pattern).unwrap(),
-                        false => return Err(err),
+                // use the Formatter object to write the formatted string
+                let mut fmt = try!(Formatter::from_str(fmt_pattern, &mut out));
+                let v = match vars.get(fmt.key) {
+                    Some(v) => v,
+                    None => match ignore_missing {
+                        true => {
+                            write!(fmt.buff, "{{{}}}", fmt_pattern).unwrap();
+                            reading_fmt = false;
+                            bytes_read = 0;
+                            continue;
+                        }
+                        false => {
+                            let mut msg = String::new();
+                            write!(msg, "Invalid key: {}", fmt.key).unwrap();
+                            return Err(FmtError::KeyError(msg));
+                        },
                     }
-                }
+                };
+                try!(fmt.str(v.as_str()));
                 reading_fmt = false;
                 bytes_read = 0;
             }

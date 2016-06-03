@@ -7,6 +7,7 @@ use std::string::String;
 mod tests;
 mod types;
 mod parser;
+mod fmtstr;
 
 pub use types::{Result, FmtError};
 pub use parser::strfmt_options;

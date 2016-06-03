@@ -27,7 +27,7 @@ fn run_tests(values: &Vec<(&str, &str, u8)>,
 
         if failure {
             println!("FAIL:");
-            println!("     input: {:?}", (fmtstr, expected, expect_err));
+            println!("     input: {:?}", fmtstr);
             println!("    output: {:?}", result);
             if expect_err != 0 {
                 let expected = match expect_err {
@@ -35,9 +35,9 @@ fn run_tests(values: &Vec<(&str, &str, u8)>,
                     2 => "FmtError::KeyError",
                     _ => unreachable!()
                 };
-                println!("    expected: {}", expected)
+                println!("  expected: {}", expected)
             } else {
-                println!("    expected: {:?}", expected);
+                println!("  expected: {:?}", expected);
             }
             assert!(false);
         }

@@ -7,16 +7,18 @@ use std::string::String;
 #[cfg(test)]
 mod tests;
 mod types;
+mod formatter;
 mod parser;
 mod fmtstr;
 
 pub use types::{Result, FmtError};
-pub use parser::strfmt_options;
+pub use fmtstr::strfmt_map;
+pub use formatter::Formatter;
 
 
 /// rust-style format a string given a HashMap of the variables
 pub fn strfmt(fmtstr: &str, vars: &HashMap<String, String>) -> Result<String> {
-    let formatter = |mut fmt: types::Formatter| {
+    let formatter = |mut fmt: Formatter| {
         let v = match vars.get(fmt.key) {
             Some(v) => v,
             None => {
@@ -27,7 +29,7 @@ pub fn strfmt(fmtstr: &str, vars: &HashMap<String, String>) -> Result<String> {
         };
         fmt.str(v.as_str())
     };
-    strfmt_options(fmtstr, &formatter)
+    strfmt_map(fmtstr, &formatter)
 }
 
 pub trait Format {

@@ -5,8 +5,8 @@ use std::string::String;
 use std::result;
 
 
-#[derive(Debug, PartialEq)]
-pub enum Align {
+#[derive(Debug, Clone, PartialEq)]
+pub enum Alignment {
     Left,
     Center,
     Right, // default
@@ -74,16 +74,3 @@ enum Type {
     Debug,
 }
 
-#[derive(Debug, PartialEq)]
-pub struct Formatter<'a, 'b> {
-    pub key: &'a str,
-    pub fill: char,
-    pub align: Align,
-    pub alternate: bool,
-    pub width: Option<usize>,
-    pub thousands: bool,
-    pub precision: Option<usize>,
-    pub ty: Option<char>,
-    pub buff: &'b mut String,
-    pub pattern: &'a str,
-}

@@ -151,26 +151,36 @@ fn test_ints_basic() {
     let values: Vec<(&str, &str, u8)> = vec![
         // simple positioning
         ("{x}", "6", 0),
+        ("{long}", "100000", 0),
+        (" the answer is {hi}, haven't you read anything?",
+         " the answer is 42, haven't you read anything?", 0),
     ];
 
     run_tests(&values, &vars, &strfmt);
 }
 
-// #[test]
-// fn test_ignore_missing() {
-//     let mut vars: HashMap<String, String> = HashMap::new();
-//     vars.insert("x".to_string(), "X".to_string());
-//     let values: Vec<(&str, &str, u8)> = vec![
-//         // simple positioning
-//         ("{y}", "{y}", 0),
-//         ("{y} {x}", "{y} X", 0),
-//         ("{x} {longish:<32.3} {x} is nice", "X {longish:<32.3} X is nice", 0),
-//     ];
-//     fn strfmt_ignore(fmtstr: &str, vars: &HashMap<String, String>) -> Result<String> {
-//         strfmt_options(fmtstr, vars, true)
-//     }
-//     run_tests(&values, &vars, &strfmt_ignore);
-// }
+#[test]
+fn test_ignore_missing() {
+    let mut vars: HashMap<String, String> = HashMap::new();
+    vars.insert("x".to_string(), "X".to_string());
+    let values: Vec<(&str, &str, u8)> = vec![
+        // simple positioning
+        ("{y}", "{y}", 0),
+        ("{y} {x}", "{y} X", 0),
+        ("{x} {longish:<32.3} {x} is nice", "X {longish:<32.3} X is nice", 0),
+    ];
+    let f = |fmt: Formatter| {
+        match vars.get(fmt.key) {
+            Some(v) => fmt.str(v),
+            None => fmt.skip(),
+        }
+    };
+
+    let strfmt_ignore = |fmtstr: &str, vars: &HashMap<String, String>| -> Result<String> {
+        strfmt_map(fmtstr, &f)
+    };
+    run_tests(&values, &vars, &strfmt_ignore);
+}
 
 
 // #[bench]

@@ -298,11 +298,11 @@ impl<'a, 'b> Formatter<'a, 'b> {
 
     /// call this to re-write the original format string verbatum
     /// back to the output
-    pub fn skip(mut self) -> fmt::Result {
+    pub fn skip(mut self) -> Result<()> {
         self.buff.push('{');
-        let out = self.write_str(self.pattern);
+        self.write_str(self.pattern).unwrap();
         self.buff.push('}');
-        out
+        Ok(())
     }
 
 

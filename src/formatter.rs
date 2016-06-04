@@ -2,7 +2,6 @@ use std::str;
 use std::fmt;
 use std::fmt::Write;
 use std::iter::Iterator;
-use std::collections::HashMap;
 use std::string::String;
 
 use types::*;
@@ -21,9 +20,6 @@ pub struct Formatter<'a, 'b> {
     buff: &'b mut String,
     pattern: &'a str,
 }
-
-
-
 
 fn is_alignment_token(c: char) -> bool {
     match c {

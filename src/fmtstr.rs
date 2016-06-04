@@ -1,5 +1,3 @@
-use std::result;
-use std::fmt;
 use std::fmt::Write;
 use std::string::String;
 
@@ -8,7 +6,7 @@ use formatter::Formatter;
 
 fn write_char(f: &mut Formatter, c: char, n: usize) {
     for _ in 0..n {
-        f.write_char(c);
+        f.write_char(c).unwrap();
     }
 }
 
@@ -111,7 +109,7 @@ impl<'a, 'b> Formatter<'a, 'b> {
         match precision {
             None => {
                 for c in chars {
-                    self.write_char(c);
+                    self.write_char(c).unwrap();
                 }
             },
             Some(p) => {write_from(&mut self, &mut chars, p);},

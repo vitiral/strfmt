@@ -1,5 +1,6 @@
 //! strfmt crate
 
+use std::fmt;
 use std::fmt::Write;
 use std::collections::HashMap;
 use std::string::String;
@@ -8,7 +9,6 @@ use std::string::String;
 mod tests;
 mod types;
 mod formatter;
-mod parser;
 mod fmtstr;
 
 pub use types::{Result, FmtError};
@@ -17,8 +17,8 @@ pub use formatter::Formatter;
 
 
 /// rust-style format a string given a HashMap of the variables
-pub fn strfmt(fmtstr: &str, vars: &HashMap<String, String>) -> Result<String> {
-    let formatter = |mut fmt: Formatter| {
+pub fn strfmt<T: fmt::Display>(fmtstr: &str, vars: &HashMap<String, T>) -> Result<String> {
+    let formatter = |fmt: Formatter| {
         let v = match vars.get(fmt.key) {
             Some(v) => v,
             None => {
@@ -27,23 +27,23 @@ pub fn strfmt(fmtstr: &str, vars: &HashMap<String, String>) -> Result<String> {
                 return Err(FmtError::KeyError(msg));
             },
         };
-        fmt.str(v.as_str())
+        fmt.str(v.to_string().as_str())
     };
     strfmt_map(fmtstr, &formatter)
 }
 
 pub trait Format {
-    fn format(&self, vars: &HashMap<String, String>) -> Result<String>;
+    fn format<D: fmt::Display>(&self, vars: &HashMap<String, D>) -> Result<String>;
 }
 
 impl Format for String {
-    fn format(&self, vars: &HashMap<String, String>) -> Result<String> {
+    fn format<D: fmt::Display>(&self, vars: &HashMap<String, D>) -> Result<String> {
         strfmt(self.as_str(), vars)
     }
 }
 
 impl Format for str {
-    fn format(&self, vars: &HashMap<String, String>) -> Result<String> {
+    fn format<D: fmt::Display>(&self, vars: &HashMap<String, D>) -> Result<String> {
         strfmt(self, vars)
     }
 }

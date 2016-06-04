@@ -55,29 +55,29 @@ impl error::Error for FmtError {
     }
 }
 
-enum Type {
-    // integer types
-    Bin,
-    Char,
-    Decimal,
-    Octal,
-    Hex,
-    HexUpper,
+// enum Type {
+//     // integer types
+//     Bin,
+//     Char,
+//     Decimal,
+//     Octal,
+//     Hex,
+//     HexUpper,
 
-    // both
-    Number,
+//     // both
+//     Number,
 
-    // Floating point types
-    Exponent,
-    ExponentUpper,
-    Fixed,
-    General,
-    GeneralUppercase,
-    Percengage,
+//     // Floating point types
+//     Exponent,
+//     ExponentUpper,
+//     Fixed,
+//     General,
+//     GeneralUppercase,
+//     Percengage,
 
-    // other types
-    None,
-    String,
-    Debug,
-}
+//     // other types
+//     None,
+//     String,
+//     Debug,
+// }
 

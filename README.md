@@ -41,7 +41,6 @@ format options for strings, but it has been built in such a way that it can supp
 any type (see HELP section below)
 
 See the [syntax](https://doc.rust-lang.org/std/fmt/#syntax) for how to create a formatted string
-```
 
 ### Current Status (in order of priority)
 - [x]: format any Display type

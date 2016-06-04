@@ -96,10 +96,18 @@ impl<'a, 'b> Formatter<'a, 'b> {
     /// This can also be used by the `u64` etc methods to finish their formatting while
     /// still using the str formatter for width and alignment
     pub fn str_unchecked(mut self, s: &str) -> Result<()> {
-        let len = s.len();
         let fill = self.fill();
         let width = self.width();
         let precision = self.precision();
+        // precision will limit length
+        let len = match precision {
+            Some(p) => if p < s.len() {
+                p
+            } else {
+                s.len()
+            },
+            None => s.len(),
+        };
 
         let mut chars = s.chars();
         let mut pad: usize = 0;
@@ -124,14 +132,7 @@ impl<'a, 'b> Formatter<'a, 'b> {
             }
             None => {}
         }
-        match precision {
-            None => {
-                for c in chars {
-                    self.write_char(c).unwrap();
-                }
-            },
-            Some(p) => {write_from(&mut self, &mut chars, p);},
-        }
+        write_from(&mut self, &mut chars, len);
         write_char(&mut self, fill, pad);
         Ok(())
     }

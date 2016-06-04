@@ -10,7 +10,7 @@ use types::*;
 pub struct Formatter<'a, 'b> {
     pub key: &'a str,
     fill: char,
-    align: Alignment,
+    align: Alignment,  // default Right
     sign: Sign,
     alternate: bool,
     width: Option<usize>,
@@ -319,6 +319,11 @@ impl<'a, 'b> Formatter<'a, 'b> {
     /// width getter
     pub fn width(&self) -> Option<usize> {
         self.width
+    }
+
+    /// thousands getter
+    pub fn thousands(&self) -> bool {
+        self.thousands
     }
 
     /// precision getter

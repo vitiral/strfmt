@@ -30,33 +30,36 @@ assert_eq!("hi, my name is {name}".format(&vars), "hi, my name is bob")
 You can use this library any time you have dynamic strings you want to format, such as
 if you are providing your users a ui or are reading configuration files.
 
-## Scope
+strfmt does not support empty identifiers (i.e. `{}` or `{:<10}`. Integer identifiers
+will be read as str keys to the hashmap (i.e. `{1:<10}` will have key == "1")
+
+## Status and Goals
 
 **strfmt** aims to support all of the formatting options defined in
-[`std::fmt`](https://doc.rust-lang.org/std/fmt/) that are useful for
-formatting strings and none of the options that are not useful for
-formatting strings.
+[`std::fmt`](https://doc.rust-lang.org/std/fmt/). Currently it only supports the
+format options for strings, but it has been built in such a way that it can support
+any type (see HELP section below)
 
-Items in the stdlib [syntax](https://doc.rust-lang.org/std/fmt/#syntax) that
-strfmt will support (with comments on what isn't supported) are:
-```
-format_string := <text> [ format <text> ] *
-format := '{' argument [ ':' format_spec ] '}'  # does not support empty `{}`
-argument := identifier  # does not support integer
-
-# format_spec does not support: sign, '#', 0, '.' precision or type
-format_spec := [[fill]align][width]
-fill := character
-align := '<' | '^' | '>'
-width := count
-count := parameter | integer
+See the [syntax](https://doc.rust-lang.org/std/fmt/#syntax) for how to create a formatted string
 ```
 
-Some notes:
-- `integer` and empty `{}` are not supported because the formatter is always a
-    HashMap<&str, &str> (dynamic types do not exist in rust like they do in python)
-- `type` is not supported because it is always "s"
-- `sign`, `#`, `0` and `.` are not supported because they are only related to numeric
-    types
-
-```
+### Current Status (in order of priority)
+- [x]: format any Display type
+- [ ]: add `f64` method to `Formatter` allowing those using `strfmt_map` to format
+    f64s according to the spec
+- [ ]: add `format_f64(&self, HashMap<String, f64>` method to `Format` allowing users
+    to easily format a hashmap of i64 values
+- [ ]: add `i64` method to `Formatter` allowing those using `strfmt_map` to format
+    i64s according to the spec
+- [ ]: add `format_i64(&self, HashMap<String, i64>` method to `Format` allowing users
+    to easily format a hashmap of i64 values
+- [ ]: look for a rust library has "unbounded float" (like python) and add that to the formatter
+- [ ]: look for a rust library has "unbounded integer" (like python) and add that to the formatter
+- [ ]: special suppport to format HashMap<String, String> for improved speed
+- [ ]: special suppport to format HashMap<String, &str> for improved speed
+- [ ]: special suppport to format HashMap<&str, &str> for improved speed
+    
+    
+Adding functionality should be fairly easy, the main piece of work is checking and handling
+the flags correctly and creating comprehensive tests. I will be implementing the `f64` versions
+soon, from which the others can be easily created

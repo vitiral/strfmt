@@ -55,11 +55,16 @@ See the [syntax](https://doc.rust-lang.org/std/fmt/#syntax) for how to create a 
     to easily format a hashmap of i64 values
 - [ ]: look for a rust library has "unbounded float" (like python) and add that to the formatter
 - [ ]: look for a rust library has "unbounded integer" (like python) and add that to the formatter
+- [ ]: Implement `vec` method to `Formatter` allowing those usin `strfmt_map` to format
+    types of `Vec<Display>` in a way that uses precision and width
+    (precision will limit the number of elements displayed, width the width of each element)
 - [ ]: special suppport to format HashMap<String, String> for improved speed
 - [ ]: special suppport to format HashMap<String, &str> for improved speed
 - [ ]: special suppport to format HashMap<&str, &str> for improved speed
     
     
+### HELP
 Adding functionality should be fairly easy, the main piece of work is checking and handling
-the flags correctly and creating comprehensive tests. I will be implementing the `f64` versions
-soon, from which the others can be easily created
+the flags correctly and creating comprehensive tests. Hopefully I will be creating the `f64`
+method soon to show how it can be done, but I could really use all the help I can get on
+making this libray complete.

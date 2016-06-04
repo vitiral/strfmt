@@ -11,7 +11,7 @@ mod types;
 mod formatter;
 mod fmtstr;
 
-pub use types::{Result, FmtError};
+pub use types::{Result, FmtError, Alignment, Sign};
 pub use fmtstr::strfmt_map;
 pub use formatter::Formatter;
 

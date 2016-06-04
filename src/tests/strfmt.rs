@@ -22,6 +22,7 @@ fn run_tests(values: &Vec<(&str, &str, u8)>,
             0 => result.is_err(),
             1 => !matches!(result, Err(FmtError::Invalid(_))),
             2 => !matches!(result, Err(FmtError::KeyError(_))),
+            3 => !matches!(result, Err(FmtError::TypeError(_))),
             c@_ => panic!("error code {} DNE", c),
         };
 
@@ -33,6 +34,7 @@ fn run_tests(values: &Vec<(&str, &str, u8)>,
                 let expected = match expect_err {
                     1 => "FmtError::Invalid",
                     2 => "FmtError::KeyError",
+                    3 => "FmtError::TypeError",
                     _ => unreachable!()
                 };
                 println!("  expected: {}", expected)
@@ -81,6 +83,9 @@ fn test_values() {
         ("{long:<<}", &too_long, 0),
         ("{long:<<5}", &too_long, 0),
 
+        // valid types
+        ("{x:<4s}", "X   ", 0),
+
         // escape
         ("{{}}", "{}", 0),
         ("{{long}}", "{long}", 0),
@@ -113,6 +118,13 @@ fn test_values() {
         ("{what}", "{}", 2),
         ("{who}", "{}", 2),
         ("{x} {where}", "{}", 2),
+
+        // invalid types
+        ("{x:#}", "", 3),
+        ("{x:<4n}", "", 3),
+        ("{x:<4d}", "", 3),
+        ("{x:,}", "", 3),
+        ("{x:<-10}", "", 3),
     ];
 
     run_tests(&values, &vars, &strfmt);

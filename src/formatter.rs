@@ -97,7 +97,7 @@ fn parse_like_python(rest: &str) -> Result<FmtPy> {
         width: -1,
         thousands: false,
         precision: -1,
-        ty: ' ',
+        ty: '\0',
     };
     let mut chars = rest.chars();
     let fake_fill = match chars.next() {
@@ -288,7 +288,7 @@ impl<'a, 'b> Formatter<'a, 'b> {
                 _ => Some(format.precision as usize),
             },
             ty: match format.ty {
-                ' ' => None,
+                '\0' => None,
                 _ => Some(format.ty),
             },
             buff: buff,
@@ -329,6 +329,11 @@ impl<'a, 'b> Formatter<'a, 'b> {
     /// precision getter
     pub fn precision(&self) -> Option<usize> {
         self.precision
+    }
+
+    /// set precision to None, used for formatting int, float, etc
+    pub fn clear_precision(&mut self) {
+        self.precision = None;
     }
 
     /// sign getter

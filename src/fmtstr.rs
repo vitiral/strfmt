@@ -66,13 +66,10 @@ fn write_from<'a, I>(fmt: &mut Formatter, f: I, n: usize) -> usize
     assert!(s == "hello");
 }
 
+/// The formatter object given to closures
 impl<'a, 'b> Formatter<'a, 'b> {
-    /// write the formatted string to `s` and return true. If there is an error: clear `s`,
-    /// write the error and return false
-    pub fn str(mut self, s: &str) -> Result<()> {
-        let mut chars = s.chars();
-        let len = s.len();
-        let mut pad: usize = 0;
+    /// format the given string onto the buffer
+    pub fn str(self, s: &str) -> Result<()> {
         if !(self.ty() == None || self.ty() == Some('s')) {
             let mut msg = String::new();
             write!(msg, "Unknown format code {:?} for object of type 'str'", self.ty()).unwrap();
@@ -80,11 +77,32 @@ impl<'a, 'b> Formatter<'a, 'b> {
         } else if self.alternate() {
             return Err(FmtError::TypeError("Alternate form (#) not allowed in string \
                                             format specifier".to_string()));
+        } else if self.thousands() {
+            return Err(FmtError::TypeError("Cannot specify ',' with 's'".to_string()));
+        } else if self.sign().is_unspecified() {
+            return Err(FmtError::TypeError("Sign not allowed in string format specifier"
+                                           .to_string()));
         }
+        self.str_unchecked(s)
+    }
 
+    /// UNSTABLE+UNTESTED: do not use in your own code (yet)
+    /// Do the same as `str` but do not check the format string for errors.
+    /// This gives a moderate performance boost.
+    /// This isn't exactly unsafe, it just ends up ignoring extranious format
+    /// specifiers
+    //  For example, {x:<-#10} should technically be formatting an int, but ignoring the
+    /// integer specific formatting is probably not the end of the world
+    /// This can also be used by the `u64` etc methods to finish their formatting while
+    /// still using the str formatter for width and alignment
+    pub fn str_unchecked(mut self, s: &str) -> Result<()> {
+        let len = s.len();
         let fill = self.fill();
         let width = self.width();
         let precision = self.precision();
+
+        let mut chars = s.chars();
+        let mut pad: usize = 0;
         match width {
             Some(mut width) => {
                 if width > len {
@@ -117,6 +135,7 @@ impl<'a, 'b> Formatter<'a, 'b> {
         write_char(&mut self, fill, pad);
         Ok(())
     }
+
 }
 
 

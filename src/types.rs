@@ -21,6 +21,15 @@ pub enum Sign {
     Space,
 }
 
+impl Sign {
+    pub fn is_unspecified(&self) -> bool {
+        match self {
+            &Sign::Unspecified => false,
+            _ => true,
+        }
+    }
+}
+
 pub type Result<T> = result::Result<T, FmtError>;
 
 /// LOC-error

@@ -1,3 +1,4 @@
+use std::fmt;
 use std::collections::HashMap;
 use super::super::*;
 
@@ -8,9 +9,9 @@ macro_rules! matches {
     }
 }
 
-fn run_tests(values: &Vec<(&str, &str, u8)>,
-             vars: &HashMap<String, String>,
-             call: &Fn(&str, &HashMap<String, String>)
+fn run_tests<T: fmt::Display>(values: &Vec<(&str, &str, u8)>,
+             vars: &HashMap<String, T>,
+             call: &Fn(&str, &HashMap<String, T>)
                       -> Result<String>) {
     for &(fmtstr, expected, expect_err) in values.iter() {
     // for input in values {
@@ -18,13 +19,20 @@ fn run_tests(values: &Vec<(&str, &str, u8)>,
     //     let expected = input.1;
     //     let expect_err = input.2;
         let result = call(fmtstr, vars);
-        let failure = match expect_err {
+        let mut failure = match expect_err {
             0 => result.is_err(),
             1 => !matches!(result, Err(FmtError::Invalid(_))),
             2 => !matches!(result, Err(FmtError::KeyError(_))),
             3 => !matches!(result, Err(FmtError::TypeError(_))),
             c@_ => panic!("error code {} DNE", c),
         };
+        let result = match result {
+            Err(e) => e.to_string(),
+            Ok(s) => s,
+        };
+        if !failure && expect_err == 0 {
+            failure = !(expected == result);
+        }
 
         if failure {
             println!("FAIL:");
@@ -125,6 +133,24 @@ fn test_values() {
         ("{x:<4d}", "", 3),
         ("{x:,}", "", 3),
         ("{x:<-10}", "", 3),
+    ];
+
+    run_tests(&values, &vars, &strfmt);
+}
+
+#[test]
+/// test using integers directly into format (uses Display)
+fn test_ints_basic() {
+    let mut vars: HashMap<String, u64> = HashMap::new();
+    vars.insert("x".to_string(), 6);
+    vars.insert("long".to_string(), 100000);  // len=10
+    vars.insert("hi".to_string(), 42);
+
+    // format, expected, error
+    // error codes: 0 == no error, 1 == Invalid, 2 == KeyError
+    let values: Vec<(&str, &str, u8)> = vec![
+        // simple positioning
+        ("{x}", "6", 0),
     ];
 
     run_tests(&values, &vars, &strfmt);

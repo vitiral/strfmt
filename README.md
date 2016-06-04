@@ -44,6 +44,7 @@ See the [syntax](https://doc.rust-lang.org/std/fmt/#syntax) for how to create a 
 
 ### Current Status (in order of priority)
 - [x]: format any Display type
+- [ ]: stabalize `strfmt_map` and add `format_map` to the `Format` trait.
 - [ ]: add `f64` method to `Formatter` allowing those using `strfmt_map` to format
     f64s according to the spec
 - [ ]: add `format_f64(&self, HashMap<String, f64>` method to `Format` allowing users

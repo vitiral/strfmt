@@ -169,7 +169,7 @@ fn test_ignore_missing() {
         ("{y} {x}", "{y} X", 0),
         ("{x} {longish:<32.3} {x} is nice", "X {longish:<32.3} X is nice", 0),
     ];
-    let f = |fmt: Formatter| {
+    let f = |mut fmt: Formatter| {
         match vars.get(fmt.key) {
             Some(v) => fmt.str(v),
             None => fmt.skip(),

@@ -18,7 +18,7 @@ pub use formatter::Formatter;
 
 /// rust-style format a string given a HashMap of the variables
 pub fn strfmt<T: fmt::Display>(fmtstr: &str, vars: &HashMap<String, T>) -> Result<String> {
-    let formatter = |fmt: Formatter| {
+    let formatter = |mut fmt: Formatter| {
         let v = match vars.get(fmt.key) {
             Some(v) => v,
             None => {

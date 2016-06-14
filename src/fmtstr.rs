@@ -69,7 +69,7 @@ fn write_from<'a, I>(fmt: &mut Formatter, f: I, n: usize) -> usize
 /// The formatter object given to closures
 impl<'a, 'b> Formatter<'a, 'b> {
     /// format the given string onto the buffer
-    pub fn str(self, s: &str) -> Result<()> {
+    pub fn str(&mut self, s: &str) -> Result<()> {
         if !(self.ty() == None || self.ty() == Some('s')) {
             let mut msg = String::new();
             write!(msg, "Unknown format code {:?} for object of type 'str'", self.ty()).unwrap();
@@ -95,7 +95,7 @@ impl<'a, 'b> Formatter<'a, 'b> {
     /// integer specific formatting is probably not the end of the world
     /// This can also be used by the `u64` etc methods to finish their formatting while
     /// still using the str formatter for width and alignment
-    pub fn str_unchecked(mut self, s: &str) -> Result<()> {
+    pub fn str_unchecked(&mut self, s: &str) -> Result<()> {
         let fill = self.fill();
         let width = self.width();
         let precision = self.precision();
@@ -120,11 +120,11 @@ impl<'a, 'b> Formatter<'a, 'b> {
                         Alignment::Center => {
                             width = width - len;
                             pad = width / 2;
-                            write_char(&mut self, fill, pad);
+                            write_char(self, fill, pad);
                             pad += width % 2;
                         }
                         Alignment::Right => {
-                            write_char(&mut self, fill, width - len);
+                            write_char(self, fill, width - len);
                         }
                         Alignment::Equal => panic!("not yet supported"), // TODO
                     }
@@ -132,8 +132,8 @@ impl<'a, 'b> Formatter<'a, 'b> {
             }
             None => {}
         }
-        write_from(&mut self, &mut chars, len);
-        write_char(&mut self, fill, pad);
+        write_from(self, &mut chars, len);
+        write_char(self, fill, pad);
         Ok(())
     }
 

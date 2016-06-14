@@ -1,8 +1,8 @@
 # strfmt: rust library for formatting dynamic strings
 
-> Note: this library is in the early stages of development and feedback (positive or negative)
+> Note: this library is fairly stable and tested, but new features are in the early stages of development and feedback (positive or negative)
 > would be much appreciated. If you use this library and liked it or decided not to use it, 
-> please ping me at @vitiral on twitter or vitiral@gmail.com via email to tell me about your
+> please ping me at [@vitiral](https://twitter.com/vitiral) on twitter or vitiral@gmail.com via email to tell me about your
 > experience. I would particularily like to see the code where it is being used. Thankyou!
 
 This library is for rust developers who want to bring rust-like

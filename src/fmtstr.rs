@@ -21,7 +21,7 @@ fn test_write_char() {
     assert!(s == "h fff");
 }
 
-fn write_from<'a, I>(fmt: &mut Formatter, f: I, n: usize) -> usize
+fn write_from<I>(fmt: &mut Formatter, f: I, n: usize) -> usize
     where I: Iterator<Item = char>
 {
     // eexaust f or run out of n, return chars written
@@ -91,7 +91,7 @@ impl<'a, 'b> Formatter<'a, 'b> {
     /// This gives a moderate performance boost.
     /// This isn't exactly unsafe, it just ends up ignoring extranious format
     /// specifiers
-    //  For example, {x:<-#10} should technically be formatting an int, but ignoring the
+    /// For example, {x:<-#10} should technically be formatting an int, but ignoring the
     /// integer specific formatting is probably not the end of the world
     /// This can also be used by the `u64` etc methods to finish their formatting while
     /// still using the str formatter for width and alignment
@@ -111,27 +111,24 @@ impl<'a, 'b> Formatter<'a, 'b> {
 
         let mut chars = s.chars();
         let mut pad: usize = 0;
-        match width {
-            Some(mut width) => {
-                if width > len {
-                    let align = self.align();
-                    match align {
-                        Alignment::Left => pad = width - len,
-                        Alignment::Center => {
-                            width = width - len;
-                            pad = width / 2;
-                            write_char(self, fill, pad);
-                            pad += width % 2;
-                        }
-                        Alignment::Right => {
-                            write_char(self, fill, width - len);
-                        }
-                        Alignment::Equal => return Err(FmtError::Invalid(
-                            "sign aware zero padding and Align '=' not yet supported".to_string())),
+        if let Some(mut width) = width {
+            if width > len {
+                let align = self.align();
+                match align {
+                    Alignment::Left => pad = width - len,
+                    Alignment::Center => {
+                        width -= len;
+                        pad = width / 2;
+                        write_char(self, fill, pad);
+                        pad += width % 2;
                     }
+                    Alignment::Right => {
+                        write_char(self, fill, width - len);
+                    }
+                    Alignment::Equal => return Err(FmtError::Invalid(
+                        "sign aware zero padding and Align '=' not yet supported".to_string())),
                 }
             }
-            None => {}
         }
         write_from(self, &mut chars, len);
         write_char(self, fill, pad);

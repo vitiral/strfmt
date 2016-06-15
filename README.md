@@ -38,7 +38,13 @@ if you are providing your users a ui or are reading configuration files.
 strfmt does not support empty identifiers (i.e. `{}` or `{:<10}`. Integer identifiers
 will be read as str keys to the hashmap (i.e. `{1:<10}` will have key == "1")
 
-## **BETA**: Formatting any type
+## **BETA**: Formatting numeric types
+> This feature is in Beta and may change. I expect it to be fairly stable
+> at this point but would appreciate feedback on development.
+>
+> In addition, "signed 0 padding" (i.e. +000042) is not yet supported
+> for numeric types
+
 Using `strfmt_map` it is also possible to format integers and floats:
 ```
 let mut vars: HashMap<String, f64> = HashMap::new();

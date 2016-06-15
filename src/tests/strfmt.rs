@@ -110,9 +110,6 @@ fn test_values() {
         // invalid fmt
         ("{}", "", 1),
         ("{:3}", "", 1),
-        ("{x:*}", "", 1),
-        ("{x::}", "", 1),
-        ("{x:<<<}", "", 1),
         ("{xxx:  <88.3}", "", 1),
 
         // invalid escape
@@ -128,6 +125,9 @@ fn test_values() {
         ("{x} {where}", "{}", 2),
 
         // invalid types
+        ("{x:<<<}", "", 3),
+        ("{x:*}", "", 3),
+        ("{x::}", "", 3),
         ("{x:#}", "", 3),
         ("{x:<4n}", "", 3),
         ("{x:<4d}", "", 3),
@@ -203,6 +203,9 @@ fn test_f64() {
         // invalid
         ("{x:s}", "", 3),
         ("{x:#}", "", 3),
+
+        // TODO
+        ("{x:+010.2}", "+0042.4242", 1),
     ];
     let f = |mut fmt: Formatter| {
         match vars.get(fmt.key) {
@@ -217,6 +220,50 @@ fn test_f64() {
     run_tests(&values, &vars, &strfmt_f64);
 }
 
+
+#[test]
+fn test_i64() {
+    let mut vars: HashMap<String, i64> = HashMap::new();
+    vars.insert("x".to_string(), 42);
+    vars.insert("y".to_string(), -100);
+    vars.insert("z".to_string(), 0);
+    let values: Vec<(&str, &str, u8)> = vec![
+        // simple valid
+        ("{x}", "42", 0),
+        ("{x:<7}", "42     ", 0),
+        ("{x:X}", "2A", 0),
+        ("{x:#x}", "0x2a", 0),
+        ("{x:#X}", "0x2A", 0),
+        ("{x:b}", "101010", 0),
+        ("{x:#b}", "0b101010", 0),
+        ("{x:o}", "52", 0),
+        ("{x:#o}", "0o52", 0),
+
+        ("{x:+}", "+42", 0),
+        ("{y}", "-100", 0),
+        ("{y:+}", "-100", 0),
+        ("{z}", "0", 0),
+        ("{z:+}", "+0", 0),
+
+        // invalid
+        ("{x:.2}", "", 3),
+        ("{x:s}", "", 3),
+
+        // TODO
+        ("{x:+010}", "+000000042", 1),
+    ];
+    let f = |mut fmt: Formatter| {
+        match vars.get(fmt.key) {
+            Some(v) => fmt.i64(*v),
+            None => panic!(),
+        }
+    };
+
+    let strfmt_f64 = |fmtstr: &str, vars: &HashMap<String, i64>| -> Result<String> {
+        strfmt_map(fmtstr, &f)
+    };
+    run_tests(&values, &vars, &strfmt_f64);
+}
 
 // #[bench]
 // fn bench_strfmt(b: &mut Bencher) {

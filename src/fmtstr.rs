@@ -126,7 +126,8 @@ impl<'a, 'b> Formatter<'a, 'b> {
                         Alignment::Right => {
                             write_char(self, fill, width - len);
                         }
-                        Alignment::Equal => panic!("not yet supported"), // TODO
+                        Alignment::Equal => return Err(FmtError::Invalid(
+                            "sign aware zero padding and Align '=' not yet supported".to_string())),
                     }
                 }
             }

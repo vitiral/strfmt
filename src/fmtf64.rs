@@ -16,8 +16,7 @@ impl<'a, 'b> Formatter<'a, 'b> {
                     'f' | 'e' | 'E' => c,
                     _ => {
                         let mut msg = String::new();
-                        write!(msg, "Unknown format code {:?} for object of type 'f64'", c)
-                            .unwrap();
+                        write!(msg, "Unknown format code {:?} for object of type f64", c).unwrap();
                         return Err(FmtError::TypeError(msg));
                     }
                 }
@@ -29,6 +28,8 @@ impl<'a, 'b> Formatter<'a, 'b> {
                                                .to_string()));
         } else if self.thousands() {
             return Err(FmtError::Invalid("thousands specifier not yet supported".to_string()));
+        } else if self.fill() == '0' && self.align() == Alignment::Right {
+            return Err(FmtError::Invalid("sign aware 0 padding not yet supported".to_string()));
         }
         let mut s = String::new();
 

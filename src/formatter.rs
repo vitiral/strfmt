@@ -38,18 +38,13 @@ fn is_sign_element(c: char) -> bool {
 fn is_type_element(c: char) -> bool {
     match c {
         'b' |
-        'c' |
-        'd' |
         'o' |
         'x' |
         'X' |
-        'n' |
         'e' |
         'E' |
         'f' |
         'F' |
-        'g' |
-        'G' |
         '%' |
         's' |
         '?' => true,
@@ -219,7 +214,7 @@ fn parse_like_python(rest: &str) -> Result<FmtPy> {
         if !is_type_element(format.ty) {
             let mut msg = String::new();
             write!(msg, "Invalid type specifier: {:?}", format.ty).unwrap();
-            return Err(FmtError::Invalid(msg));
+            return Err(FmtError::TypeError(msg));
         }
         // pos+=1;
     }

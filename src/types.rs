@@ -1,6 +1,5 @@
 use std::fmt;
 use std::error;
-use std::fmt::Write;
 use std::string::String;
 use std::result;
 
@@ -23,8 +22,8 @@ pub enum Sign {
 
 impl Sign {
     pub fn is_unspecified(&self) -> bool {
-        match self {
-            &Sign::Unspecified => false,
+        match *self {
+            Sign::Unspecified => false,
             _ => true,
         }
     }
@@ -42,20 +41,20 @@ pub enum FmtError {
 
 impl fmt::Display for FmtError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            &FmtError::Invalid(ref s) => write!(f, "Invalid({})", s),
-            &FmtError::KeyError(ref s) => write!(f, "KeyError({})", s),
-            &FmtError::TypeError(ref s) => write!(f, "TypeError({})", s),
+        match *self {
+            FmtError::Invalid(ref s) => write!(f, "Invalid({})", s),
+            FmtError::KeyError(ref s) => write!(f, "KeyError({})", s),
+            FmtError::TypeError(ref s) => write!(f, "TypeError({})", s),
         }
     }
 }
 
 impl error::Error for FmtError {
     fn description(&self) -> &str {
-        match self {
-            &FmtError::Invalid(_) => "invalid format string",
-            &FmtError::KeyError(_) => "invalid key",
-            &FmtError::TypeError(_) => "error during type resolution",
+        match *self {
+            FmtError::Invalid(_) => "invalid format string",
+            FmtError::KeyError(_) => "invalid key",
+            FmtError::TypeError(_) => "error during type resolution",
         }
     }
 

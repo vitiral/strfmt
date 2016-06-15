@@ -364,21 +364,13 @@ impl<'a, 'b> Formatter<'a, 'b> {
     /// sign plus getter
     /// here because it is in fmt::Formatter
     pub fn sign_plus(&self) -> bool {
-        if self.sign == Sign::Plus {
-            true
-        } else {
-            false
-        }
+        self.sign == Sign::Plus
     }
 
     /// sign minus getter
     /// here because it is in fmt::Formatter
     pub fn sign_minus(&self) -> bool {
-        if self.sign == Sign::Plus {
-            true
-        } else {
-            false
-        }
+        self.sign == Sign::Minus
     }
 
     /// alternate getter

@@ -63,14 +63,14 @@ assert_eq!(strfmt_map("{z:+.2E}", f).unwrap(), "+0.00E0");
 # Status and Goals
 
 **strfmt** aims to support all of the formatting options defined in
-[`std::fmt`](https://doc.rust-lang.org/std/fmt/). Currently it only supports the
-format options for strings, but it has been built in such a way that it can support
-any type (see HELP section below)
+[`std::fmt`](https://doc.rust-lang.org/std/fmt/). Currently it officially only supports 
+the format options for strings (beta support for i64 and f64)
 
 See the [syntax](https://doc.rust-lang.org/std/fmt/#syntax) for how to create a formatted string
 
 ### Current Status (in order of priority)
 [ ]: get strfmt_map out of Beta and create Format.format_map method
+[ ]: handle sign aware zero padding for numeric types
 [x]: format any Display type
 [x]: stabalize `strfmt_map` and add `format_map` to the `Format` trait.
 [x]: add `f64` method to `Formatter` allowing those using `strfmt_map` to format

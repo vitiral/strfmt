@@ -12,18 +12,13 @@ impl<'a, 'b> Formatter<'a, 'b> {
     pub fn i64(&mut self, i: i64) -> Result<()> {
         let ty = match self.ty() {
             None => ' ',
-            Some(c) => {
-                match c {
-                    'b' | 'o' | 'x' | 'X' => c,
-                    _ => {
-                        let mut msg = String::new();
-                        write!(msg, "Unknown format code {:?} for object of type i64", c)
-                            .unwrap();
-                        return Err(FmtError::TypeError(msg));
-                    }
-                }
-            }
+            Some(c) => c,
         };
+        if !self.is_int_type() {
+            let mut msg = String::new();
+            write!(msg, "Unknown format code {:?} for object of type i64", ty).unwrap();
+            return Err(FmtError::TypeError(msg));
+        }
         if self.precision() != None {
             return Err(FmtError::TypeError("precision not allowed for integers".to_string()));
         } else if self.thousands() {

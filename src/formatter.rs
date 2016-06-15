@@ -392,6 +392,32 @@ impl<'a, 'b> Formatter<'a, 'b> {
     pub fn ty(&self) -> Option<char> {
         self.ty
     }
+
+    /// UNSTABLE: in the future, this may return true if all validty
+    ///   checks for a float return true
+    /// return true if ty is valid for formatting integers
+    pub fn is_int_type(&self) -> bool {
+        match self.ty {
+            None => true,
+            Some(c) => match c {
+                'b' | 'o' | 'x' | 'X' => true,
+                _ => false,
+            }
+        }
+    }
+
+    /// UNSTABLE: in the future, this may return true if all validty
+    ///   checks for a float return true
+    /// return true if ty is valid for formatting floats
+    pub fn is_float_type(&self) -> bool {
+        match self.ty {
+            None => true,
+            Some(c) => match c {
+                'f' | 'e' | 'E' => true,
+                _ => false,
+            }
+        }
+    }
 }
 
 

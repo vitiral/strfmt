@@ -1,7 +1,8 @@
+#![allow(unused_variables)]
+
 use std::fmt;
 use std::collections::HashMap;
 use super::super::*;
-
 
 macro_rules! matches {
     ($e:expr, $p:pat) => {
@@ -14,10 +15,6 @@ fn run_tests<T: fmt::Display>(values: &Vec<(&str, &str, u8)>,
              call: &Fn(&str, &HashMap<String, T>)
                       -> Result<String>) {
     for &(fmtstr, expected, expect_err) in values.iter() {
-    // for input in values {
-    //     let fmtstr = input.0;
-    //     let expected = input.1;
-    //     let expect_err = input.2;
         let result = call(fmtstr, vars);
         let mut failure = match expect_err {
             0 => result.is_err(),

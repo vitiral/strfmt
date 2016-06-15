@@ -11,17 +11,13 @@ impl<'a, 'b> Formatter<'a, 'b> {
     pub fn f64(&mut self, f: f64) -> Result<()> {
         let ty = match self.ty() {
             None => 'f',
-            Some(c) => {
-                match c {
-                    'f' | 'e' | 'E' => c,
-                    _ => {
-                        let mut msg = String::new();
-                        write!(msg, "Unknown format code {:?} for object of type f64", c).unwrap();
-                        return Err(FmtError::TypeError(msg));
-                    }
-                }
-            }
+            Some(c) => c,
         };
+        if !self.is_float_type() {
+            let mut msg = String::new();
+            write!(msg, "Unknown format code {:?} for object of type f64", ty).unwrap();
+            return Err(FmtError::TypeError(msg));
+        }
         if self.alternate() {
             return Err(FmtError::TypeError("Alternate form (#) not allowed in f64 format \
                                             specifier"

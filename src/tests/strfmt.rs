@@ -182,6 +182,41 @@ fn test_ignore_missing() {
     run_tests(&values, &vars, &strfmt_ignore);
 }
 
+#[test]
+fn test_f64() {
+    let mut vars: HashMap<String, f64> = HashMap::new();
+    vars.insert("x".to_string(), 42.4242);
+    vars.insert("y".to_string(), -100.11111);
+    vars.insert("z".to_string(), 0.);
+    let values: Vec<(&str, &str, u8)> = vec![
+        // simple valid
+        ("{x}", "42.4242", 0),
+        ("{x:.2}", "42.42", 0),
+        ("{x:<7.2}", "42.42  ", 0),
+        ("{x:.2e}", "4.24e1", 0),
+        ("{x:.2E}", "4.24E1", 0),
+        ("{x:+}", "+42.4242", 0),
+        ("{y:.2E}", "-1.00E2", 0),
+        ("{y:+.2E}", "-1.00E2", 0),
+        ("{z:+.2E}", "+0.00E0", 0),
+
+        // invalid
+        ("{x:s}", "", 3),
+        ("{x:#}", "", 3),
+    ];
+    let f = |mut fmt: Formatter| {
+        match vars.get(fmt.key) {
+            Some(v) => fmt.f64(*v),
+            None => panic!(),
+        }
+    };
+
+    let strfmt_f64 = |fmtstr: &str, vars: &HashMap<String, f64>| -> Result<String> {
+        strfmt_map(fmtstr, &f)
+    };
+    run_tests(&values, &vars, &strfmt_f64);
+}
+
 
 // #[bench]
 // fn bench_strfmt(b: &mut Bencher) {

@@ -10,7 +10,7 @@ use types::*;
 pub struct Formatter<'a, 'b> {
     pub key: &'a str,
     fill: char,
-    align: Alignment,  // default Right
+    align: Alignment, // default Right
     sign: Sign,
     alternate: bool,
     width: Option<usize>,
@@ -37,9 +37,22 @@ fn is_sign_element(c: char) -> bool {
 
 fn is_type_element(c: char) -> bool {
     match c {
-        'b' | 'c' | 'd' | 'o' | 'x' | 'X' | 'n' |
-        'e' | 'E' | 'f' | 'F' | 'g' | 'G' | '%' |
-        's' | '?' => true,
+        'b' |
+        'c' |
+        'd' |
+        'o' |
+        'x' |
+        'X' |
+        'n' |
+        'e' |
+        'E' |
+        'f' |
+        'F' |
+        'g' |
+        'G' |
+        '%' |
+        's' |
+        '?' => true,
         _ => false,
     }
 }
@@ -51,7 +64,7 @@ fn get_integer(s: &[u8], pos: usize) -> (usize, Option<i64>) {
     let mut consumed: usize = 0;
     for b in rest {
         match *b as char {
-            '0'...'9' => {},
+            '0'...'9' => {}
             _ => break,
         };
         consumed += 1;
@@ -60,7 +73,8 @@ fn get_integer(s: &[u8], pos: usize) -> (usize, Option<i64>) {
         (0, None)
     } else {
         let (intstr, _) = rest.split_at(consumed);
-        let val = unsafe { // I think I can be reasonably sure that 0-9 chars are utf8 :)
+        let val = unsafe {
+            // I think I can be reasonably sure that 0-9 chars are utf8 :)
             match str::from_utf8_unchecked(intstr).parse::<i64>() {
                 Ok(v) => Some(v),
                 Err(_) => None,
@@ -85,9 +99,9 @@ struct FmtPy {
 }
 
 fn parse_like_python(rest: &str) -> Result<FmtPy> {
-    /* The rest of this was pretty much strait up copied from python's format parser
-        All credit goes to python source file: formatter_unicode.c
-    */
+    // The rest of this was pretty much strait up copied from python's format parser
+    // All credit goes to python source file: formatter_unicode.c
+    //
 
     let mut format = FmtPy {
         fill: ' ',
@@ -115,39 +129,40 @@ fn parse_like_python(rest: &str) -> Result<FmtPy> {
     let end: usize = rest.len();
     let mut pos: usize = 0;
 
-    /* If the second char is an alignment token,
-        then fake_fill as fill */
-    if end-pos >= 1 + fake_fill.len_utf8() && is_alignment_token(rest[pos + fake_fill.len_utf8()] as char) {
+    // If the second char is an alignment token,
+    // then fake_fill as fill
+    if end - pos >= 1 + fake_fill.len_utf8() &&
+       is_alignment_token(rest[pos + fake_fill.len_utf8()] as char) {
         format.align = rest[pos + fake_fill.len_utf8()] as char;
         format.fill = fake_fill;
         fill_specified = true;
         align_specified = true;
         pos += 1 + fake_fill.len_utf8();
-    } else if end-pos >= 1 && is_alignment_token(fake_fill) {
+    } else if end - pos >= 1 && is_alignment_token(fake_fill) {
         format.align = fake_fill;
         pos += fake_fill.len_utf8();
     }
 
-    /* Parse the various sign options */
-    if end-pos >= 1 && is_sign_element(rest[pos] as char) {
+    // Parse the various sign options
+    if end - pos >= 1 && is_sign_element(rest[pos] as char) {
         format.sign = rest[pos] as char;
-        pos+=1;
+        pos += 1;
     }
 
-    /* If the next character is #, we're in alternate mode.  This only
-        applies to integers. */
-    if end-pos >= 1 && rest[pos] as char == '#' {
+    // If the next character is #, we're in alternate mode.  This only
+    // applies to integers.
+    if end - pos >= 1 && rest[pos] as char == '#' {
         format.alternate = true;
-        pos+=1;
+        pos += 1;
     }
 
-    /* The special case for 0-padding (backwards compat) */
-    if !fill_specified && end-pos >= 1 && rest[pos] == '0' as u8 {
+    // The special case for 0-padding (backwards compat)
+    if !fill_specified && end - pos >= 1 && rest[pos] == '0' as u8 {
         format.fill = '0';
         if !align_specified {
             format.align = '=';
         }
-        pos+=1;
+        pos += 1;
     }
 
     // check to make sure that val is good
@@ -162,27 +177,29 @@ fn parse_like_python(rest: &str) -> Result<FmtPy> {
         }
     }
 
-    /* Comma signifies add thousands separators */
-    if end-pos > 0 && rest[pos] as char == ',' {
+    // Comma signifies add thousands separators
+    if end - pos > 0 && rest[pos] as char == ',' {
         format.thousands = true;
-        pos+=1;
+        pos += 1;
     }
 
-    /* Parse field precision */
-    if end-pos > 0 && rest[pos] as char == '.' {
-        pos+=1;
+    // Parse field precision
+    if end - pos > 0 && rest[pos] as char == '.' {
+        pos += 1;
 
         let (consumed, val) = get_integer(rest, pos);
         if consumed != 0 {
             match val {
-                None => return Err(FmtError::Invalid("overflow error when parsing precision"
-                                            .to_string())),
+                None => {
+                    return Err(FmtError::Invalid("overflow error when parsing precision"
+                                                     .to_string()))
+                }
                 Some(v) => {
                     format.precision = v;
                 }
             }
         } else {
-            /* Not having a precision after a dot is an error. */
+            // Not having a precision after a dot is an error.
             if consumed == 0 {
                 return Err(FmtError::Invalid("Format specifier missing precision".to_string()));
             }
@@ -191,13 +208,13 @@ fn parse_like_python(rest: &str) -> Result<FmtPy> {
 
     }
 
-    /* Finally, parse the type field. */
-    if end-pos > 1 {
-        /* More than one char remain, invalid format specifier. */
+    // Finally, parse the type field.
+    if end - pos > 1 {
+        // More than one char remain, invalid format specifier.
         return Err(FmtError::Invalid("Invalid format specifier".to_string()));
     }
 
-    if end-pos == 1 {
+    if end - pos == 1 {
         format.ty = rest[pos] as char;
         if !is_type_element(format.ty) {
             let mut msg = String::new();
@@ -207,13 +224,20 @@ fn parse_like_python(rest: &str) -> Result<FmtPy> {
         // pos+=1;
     }
 
-    /* Do as much validating as we can, just by looking at the format
-        specifier.  Do not take into account what type of formatting
-        we're doing (int, float, string). */
+    // Do as much validating as we can, just by looking at the format
+    // specifier.  Do not take into account what type of formatting
+    // we're doing (int, float, string).
     if format.thousands {
         match format.ty {
-            'd' | 'e' | 'f' | 'g' | 'E' | 'G' |
-            '%' | 'F' | '\0' => {}, /* These are allowed. See PEP 378.*/
+            'd' |
+            'e' |
+            'f' |
+            'g' |
+            'E' |
+            'G' |
+            '%' |
+            'F' |
+            '\0' => {} /* These are allowed. See PEP 378.*/
 
             _ => {
                 let mut msg = String::new();
@@ -231,8 +255,9 @@ impl<'a, 'b> Formatter<'a, 'b> {
         let mut found_colon = false;
         let mut chars = s.chars();
         let mut c = match chars.next() {
-            Some(':') | None => return Err(
-                FmtError::Invalid("must specify identifier".to_string())),
+            Some(':') | None => {
+                return Err(FmtError::Invalid("must specify identifier".to_string()))
+            }
             Some(c) => c,
         };
         let mut consumed = 0;
@@ -260,7 +285,7 @@ impl<'a, 'b> Formatter<'a, 'b> {
 
         let format = try!(parse_like_python(rest));
 
-        Ok(Formatter{
+        Ok(Formatter {
             key: identifier,
             fill: format.fill,
             align: match format.align {
@@ -332,8 +357,8 @@ impl<'a, 'b> Formatter<'a, 'b> {
     }
 
     /// set precision to None, used for formatting int, float, etc
-    pub fn clear_precision(&mut self) {
-        self.precision = None;
+    pub fn set_precision(&mut self, precision: Option<usize>) {
+        self.precision = precision;
     }
 
     /// sign getter
@@ -375,7 +400,7 @@ impl<'a, 'b> Formatter<'a, 'b> {
 }
 
 
-impl <'a, 'b>fmt::Write for Formatter<'a, 'b> {
+impl<'a, 'b> fmt::Write for Formatter<'a, 'b> {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         self.buff.write_str(s)
     }

@@ -10,6 +10,7 @@ mod tests;
 mod types;
 mod formatter;
 mod fmtstr;
+mod fmtf64;
 
 pub use types::{Result, FmtError, Alignment, Sign};
 pub use fmtstr::strfmt_map;

@@ -66,7 +66,7 @@ fn write_from<'a, I>(fmt: &mut Formatter, f: I, n: usize) -> usize
     assert!(s == "hello");
 }
 
-/// The formatter object given to closures
+/// implement formatting of strings
 impl<'a, 'b> Formatter<'a, 'b> {
     /// format the given string onto the buffer
     pub fn str(&mut self, s: &str) -> Result<()> {

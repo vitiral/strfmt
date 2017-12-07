@@ -262,6 +262,50 @@ fn test_i64() {
     run_tests(&values, &vars, &strfmt_f64);
 }
 
+#[test]
+fn test_u16() {
+    let mut vars: HashMap<String, u16> = HashMap::new();
+    vars.insert("x".to_string(), 42);
+    vars.insert("y".to_string(), 0);
+    let values: Vec<(&str, &str, u8)> = vec![
+        ("{x}", "42", 0),
+        ("{x:<7}", "42     ", 0),
+        ("{x:>7}", "     42", 0),
+        ("{x:^7}", "  42   ", 0),
+        ("{x:x}", "2a", 0),
+        ("{x:X}", "2A", 0),
+        ("{x:+x}", "+2a", 0),
+        ("{x:#x}", "0x2a", 0),
+        ("{x:#X}", "0x2A", 0),
+        ("{x:b}", "101010", 0),
+        ("{x:#b}", "0b101010", 0),
+        ("{x:o}", "52", 0),
+        ("{x:#o}", "0o52", 0),
+
+        ("{x:+}", "+42", 0),
+        ("{y:-}", "0", 0),
+        ("{y:+}", "+0", 0),
+
+        // invalid
+        ("{x:.2}", "", 3),
+        ("{x:s}", "", 3),
+
+        // TODO
+        ("{x:+010}", "+000000042", 1),
+    ];
+    let f = |mut fmt: Formatter| {
+        match vars.get(fmt.key) {
+            Some(v) => fmt.u16(*v),
+            None => panic!(),
+        }
+    };
+
+    let strfmt_u16 = |fmtstr: &str, vars: &HashMap<String, u16>| -> Result<String> {
+        strfmt_map(fmtstr, &f)
+    };
+    run_tests(&values, &vars, &strfmt_u16);
+}
+
 // #[bench]
 // fn bench_strfmt(b: &mut Bencher) {
 //     let mut vars: HashMap<String, String> = HashMap::new();

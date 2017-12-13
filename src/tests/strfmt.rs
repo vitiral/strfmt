@@ -179,88 +179,149 @@ fn test_ignore_missing() {
     run_tests(&values, &vars, &strfmt_ignore);
 }
 
-#[test]
-fn test_f64() {
-    let mut vars: HashMap<String, f64> = HashMap::new();
-    vars.insert("x".to_string(), 42.4242);
-    vars.insert("y".to_string(), -100.11111);
-    vars.insert("z".to_string(), 0.);
-    let values: Vec<(&str, &str, u8)> = vec![
-        // simple valid
-        ("{x}", "42.4242", 0),
-        ("{x:.2}", "42.42", 0),
-        ("{x:<7.2}", "42.42  ", 0),
-        ("{x:.2e}", "4.24e1", 0),
-        ("{x:.2E}", "4.24E1", 0),
-        ("{x:+}", "+42.4242", 0),
-        ("{y:.2E}", "-1.00E2", 0),
-        ("{y:+.2E}", "-1.00E2", 0),
-        ("{z:+.2E}", "+0.00E0", 0),
+macro_rules! test_float {
+    ($($name:ident $t:ident),*) => ($(
+        #[test]
+        fn $name() {
+            let mut vars: HashMap<String, $t> = HashMap::new();
+            vars.insert("x".to_string(), 42.4242);
+            vars.insert("y".to_string(), -100.11111);
+            vars.insert("z".to_string(), 0.);
+            let values: Vec<(&str, &str, u8)> = vec![
+                // simple valid
+                ("{x}", "42.4242", 0),
+                ("{x:.2}", "42.42", 0),
+                ("{x:<7.2}", "42.42  ", 0),
+                ("{x:.2e}", "4.24e1", 0),
+                ("{x:.2E}", "4.24E1", 0),
+                ("{x:+}", "+42.4242", 0),
+                ("{y:.2E}", "-1.00E2", 0),
+                ("{y:+.2E}", "-1.00E2", 0),
+                ("{z:+.2E}", "+0.00E0", 0),
 
-        // invalid
-        ("{x:s}", "", 3),
-        ("{x:#}", "", 3),
+                // invalid
+                ("{x:s}", "", 3),
+                ("{x:#}", "", 3),
 
-        // TODO
-        ("{x:+010.2}", "+0042.4242", 1),
-    ];
-    let f = |mut fmt: Formatter| {
-        match vars.get(fmt.key) {
-            Some(v) => fmt.f64(*v),
-            None => panic!(),
-        }
-    };
+                // TODO
+                ("{x:+010.2}", "+0042.4242", 1),
+            ];
+            let f = |mut fmt: Formatter| {
+                match vars.get(fmt.key) {
+                    Some(v) => fmt.$t(*v),
+                    None => panic!(),
+                }
+            };
 
-    let strfmt_f64 = |fmtstr: &str, vars: &HashMap<String, f64>| -> Result<String> {
-        strfmt_map(fmtstr, &f)
-    };
-    run_tests(&values, &vars, &strfmt_f64);
+            let strfmt_float = |fmtstr: &str, vars: &HashMap<String, $t>| -> Result<String> {
+                strfmt_map(fmtstr, &f)
+            };
+            run_tests(&values, &vars, &strfmt_float);
+         }
+    )*)
 }
 
+test_float!(test_f32 f32, test_f64 f64);
 
-#[test]
-fn test_i64() {
-    let mut vars: HashMap<String, i64> = HashMap::new();
-    vars.insert("x".to_string(), 42);
-    vars.insert("y".to_string(), -100);
-    vars.insert("z".to_string(), 0);
-    let values: Vec<(&str, &str, u8)> = vec![
-        // simple valid
-        ("{x}", "42", 0),
-        ("{x:<7}", "42     ", 0),
-        ("{x:X}", "2A", 0),
-        ("{x:#x}", "0x2a", 0),
-        ("{x:#X}", "0x2A", 0),
-        ("{x:b}", "101010", 0),
-        ("{x:#b}", "0b101010", 0),
-        ("{x:o}", "52", 0),
-        ("{x:#o}", "0o52", 0),
+macro_rules! test_uint {
+    ($($name:ident $t:ident),*) => ($(
+        #[test]
+        fn $name() {
+            let mut vars: HashMap<String, $t> = HashMap::new();
+            vars.insert("x".to_string(), 42);
+            vars.insert("y".to_string(), 0);
+            let values: Vec<(&str, &str, u8)> = vec![
+                ("{x}", "42", 0),
+                ("{x:<7}", "42     ", 0),
+                ("{x:>7}", "     42", 0),
+                ("{x:^7}", "  42   ", 0),
+                ("{x:x}", "2a", 0),
+                ("{x:X}", "2A", 0),
+                ("{x:+x}", "+2a", 0),
+                ("{x:#x}", "0x2a", 0),
+                ("{x:#X}", "0x2A", 0),
+                ("{x:b}", "101010", 0),
+                ("{x:#b}", "0b101010", 0),
+                ("{x:o}", "52", 0),
+                ("{x:#o}", "0o52", 0),
 
-        ("{x:+}", "+42", 0),
-        ("{y}", "-100", 0),
-        ("{y:+}", "-100", 0),
-        ("{z}", "0", 0),
-        ("{z:+}", "+0", 0),
+                ("{x:+}", "+42", 0),
+                ("{y:-}", "0", 0),
+                ("{y:+}", "+0", 0),
 
-        // invalid
-        ("{x:.2}", "", 3),
-        ("{x:s}", "", 3),
+                // invalid
+                ("{x:.2}", "", 3),
+                ("{x:s}", "", 3),
 
-        // TODO
-        ("{x:+010}", "+000000042", 1),
-    ];
-    let f = |mut fmt: Formatter| {
-        match vars.get(fmt.key) {
-            Some(v) => fmt.i64(*v),
-            None => panic!(),
-        }
-    };
+                // TODO
+                ("{x:+010}", "+000000042", 1),
+            ];
+            let f = |mut fmt: Formatter| {
+                match vars.get(fmt.key) {
+                    Some(v) => fmt.$t(*v),
+                    None => panic!(),
+                }
+            };
 
-    let strfmt_f64 = |fmtstr: &str, vars: &HashMap<String, i64>| -> Result<String> {
-        strfmt_map(fmtstr, &f)
-    };
-    run_tests(&values, &vars, &strfmt_f64);
+            let strfmt_int = |fmtstr: &str, vars: &HashMap<String, $t>| -> Result<String> {
+                strfmt_map(fmtstr, &f)
+            };
+            run_tests(&values, &vars, &strfmt_int);
+         }
+    )*)
 }
+
+macro_rules! test_int {
+    ($($name:ident $t:ident),*) => ($(
+        #[test]
+        fn $name() {
+            let mut vars: HashMap<String, $t> = HashMap::new();
+            vars.insert("x".to_string(), 42);
+            vars.insert("y".to_string(), -100);
+            vars.insert("z".to_string(), 0);
+            let values: Vec<(&str, &str, u8)> = vec![
+                // simple valid
+                ("{x}", "42", 0),
+                ("{x:<7}", "42     ", 0),
+                ("{x:X}", "2A", 0),
+                ("{x:#x}", "0x2a", 0),
+                ("{x:#X}", "0x2A", 0),
+                ("{x:b}", "101010", 0),
+                ("{x:#b}", "0b101010", 0),
+                ("{x:o}", "52", 0),
+                ("{x:#o}", "0o52", 0),
+
+                ("{x:+}", "+42", 0),
+                ("{y}", "-100", 0),
+                ("{y:+}", "-100", 0),
+                ("{z}", "0", 0),
+                ("{z:-}", "0", 0),
+                ("{z:+}", "+0", 0),
+
+                // invalid
+                ("{x:.2}", "", 3),
+                ("{x:s}", "", 3),
+
+                // TODO
+                ("{x:+010}", "+000000042", 1),
+            ];
+            let f = |mut fmt: Formatter| {
+                match vars.get(fmt.key) {
+                    Some(v) => fmt.$t(*v),
+                    None => panic!(),
+                }
+            };
+
+            let strfmt_uint = |fmtstr: &str, vars: &HashMap<String, $t>| -> Result<String> {
+                strfmt_map(fmtstr, &f)
+            };
+            run_tests(&values, &vars, &strfmt_uint);
+        }
+    )*)
+}
+
+test_uint!(test_u8 u8, test_u16 u16, test_u32 u32, test_u64 u64, test_usize usize);
+test_int!(test_i8 i8, test_i16 i16, test_i32 i32, test_i64 i64, test_isize isize);
 
 // #[bench]
 // fn bench_strfmt(b: &mut Bencher) {

@@ -1,22 +1,22 @@
 //! strfmt crate
 
+use std::collections::HashMap;
 use std::fmt;
 use std::fmt::Write;
-use std::collections::HashMap;
 use std::string::String;
 
+mod fmtstr;
+mod formatter;
 #[cfg(test)]
 mod tests;
 mod types;
-mod formatter;
-mod fmtstr;
 
 #[macro_use]
 mod fmtnum;
 
-pub use types::{Result, FmtError, Alignment, Sign};
 pub use fmtstr::strfmt_map;
 pub use formatter::Formatter;
+pub use types::{Alignment, FmtError, Result, Sign};
 
 // u128 & i128 unstable (see https://github.com/rust-lang/rust/issues/35118)
 fmtint!(u8 i8 u16 i16 u32 i32 u64 i64 usize isize);
@@ -31,7 +31,7 @@ pub fn strfmt<T: fmt::Display>(fmtstr: &str, vars: &HashMap<String, T>) -> Resul
                 let mut msg = String::new();
                 write!(msg, "Invalid key: {}", fmt.key).unwrap();
                 return Err(FmtError::KeyError(msg));
-            },
+            }
         };
         fmt.str(v.to_string().as_str())
     };

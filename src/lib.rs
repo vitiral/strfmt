@@ -3,6 +3,8 @@
 use std::collections::HashMap;
 use std::fmt;
 use std::fmt::Write;
+use std::hash::Hash;
+use std::str::FromStr;
 use std::string::String;
 
 mod fmtstr;
@@ -23,14 +25,21 @@ fmtint!(u8 i8 u16 i16 u32 i32 u64 i64 usize isize);
 fmtfloat!(f32 f64);
 
 /// Rust-style format a string given a `HashMap` of the variables.
-pub fn strfmt<T: fmt::Display>(fmtstr: &str, vars: &HashMap<String, T>) -> Result<String> {
+pub fn strfmt<K, T: fmt::Display>(fmtstr: &str, vars: &HashMap<K, T>) -> Result<String>
+where
+    K: Hash + Eq + FromStr,
+{
     let formatter = |mut fmt: Formatter| {
-        let v = match vars.get(fmt.key) {
+        let k: K = match fmt.key.parse() {
+            Ok(k) => k,
+            Err(_) => {
+                return Err(new_key_error(fmt.key));
+            }
+        };
+        let v = match vars.get(&k) {
             Some(v) => v,
             None => {
-                let mut msg = String::new();
-                write!(msg, "Invalid key: {}", fmt.key).unwrap();
-                return Err(FmtError::KeyError(msg));
+                return Err(new_key_error(fmt.key));
             }
         };
         fmt.str(v.to_string().as_str())
@@ -39,17 +48,31 @@ pub fn strfmt<T: fmt::Display>(fmtstr: &str, vars: &HashMap<String, T>) -> Resul
 }
 
 pub trait Format {
-    fn format<D: fmt::Display>(&self, vars: &HashMap<String, D>) -> Result<String>;
+    fn format<K, D: fmt::Display>(&self, vars: &HashMap<K, D>) -> Result<String>
+    where
+        K: Hash + Eq + FromStr;
 }
 
 impl Format for String {
-    fn format<D: fmt::Display>(&self, vars: &HashMap<String, D>) -> Result<String> {
+    fn format<'a, K, D: fmt::Display>(&self, vars: &HashMap<K, D>) -> Result<String>
+    where
+        K: Hash + Eq + FromStr,
+    {
         strfmt(self.as_str(), vars)
     }
 }
 
 impl Format for str {
-    fn format<D: fmt::Display>(&self, vars: &HashMap<String, D>) -> Result<String> {
+    fn format<K, D: fmt::Display>(&self, vars: &HashMap<K, D>) -> Result<String>
+    where
+        K: Hash + Eq + FromStr,
+    {
         strfmt(self, vars)
     }
+}
+
+fn new_key_error(key: &str) -> FmtError {
+    let mut msg = String::new();
+    write!(msg, "Invalid key: {}", key).unwrap();
+    FmtError::KeyError(msg)
 }

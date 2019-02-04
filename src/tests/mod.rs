@@ -1,8 +1,9 @@
 mod fmt;
+mod key;
 mod strfmt;
 mod test_trait;
 
-use super::{FmtError};
+use super::FmtError;
 
 #[test]
 fn test_error() {

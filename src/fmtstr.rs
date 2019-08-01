@@ -70,6 +70,7 @@ fn write_from<I>(fmt: &mut Formatter, f: I, n: usize) -> usize
 impl<'a, 'b> Formatter<'a, 'b> {
     /// format the given string onto the buffer
     pub fn str(&mut self, s: &str) -> Result<()> {
+        self.set_default_align(Alignment::Left);
         if !(self.ty() == None || self.ty() == Some('s')) {
             let mut msg = String::new();
             write!(msg, "Unknown format code {:?} for object of type 'str'", self.ty()).unwrap();
@@ -127,6 +128,7 @@ impl<'a, 'b> Formatter<'a, 'b> {
                     }
                     Alignment::Equal => return Err(FmtError::Invalid(
                         "sign aware zero padding and Align '=' not yet supported".to_string())),
+                    Alignment::Unspecified => unreachable!(),
                 }
             }
         }

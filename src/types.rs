@@ -6,9 +6,10 @@ use std::result;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Alignment {
+    Unspecified, // default Left for strings, Right for numbers
     Left,
     Center,
-    Right, // default
+    Right,
     Equal,
 }
 

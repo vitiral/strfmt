@@ -10,7 +10,7 @@ use types::*;
 pub struct Formatter<'a, 'b> {
     pub key: &'a str,
     fill: char,
-    align: Alignment, // default Right
+    align: Alignment, // default Right for numbers, Left for strings
     sign: Sign,
     alternate: bool,
     width: Option<usize>,
@@ -100,7 +100,7 @@ fn parse_like_python(rest: &str) -> Result<FmtPy> {
 
     let mut format = FmtPy {
         fill: ' ',
-        align: '>',
+        align: '\0',
         alternate: false,
         sign: '\0',
         width: -1,
@@ -284,6 +284,7 @@ impl<'a, 'b> Formatter<'a, 'b> {
             key: identifier,
             fill: format.fill,
             align: match format.align {
+                '\0' => Alignment::Unspecified,
                 '<' => Alignment::Left,
                 '^' => Alignment::Center,
                 '>' => Alignment::Right,
@@ -334,6 +335,13 @@ impl<'a, 'b> Formatter<'a, 'b> {
     /// align getter
     pub fn align(&self) -> Alignment {
         self.align.clone()
+    }
+
+    // provide default for unspecified alignment
+    pub fn set_default_align(&mut self, align: Alignment) {
+        if self.align == Alignment::Unspecified {
+            self.align = align
+        }
     }
 
     /// width getter

@@ -66,7 +66,7 @@ fn test_values() {
         // simple positioning
         ("{x}", "X", 0),
         ("{x:}", "X", 0),
-        ("{x:3}", "  X", 0),
+        ("{x:3}", "X  ", 0),
         ("{x:>3}", "  X", 0),
         ("{x:<3}", "X  ", 0),
         ("{x:^3}", " X ", 0),
@@ -77,12 +77,16 @@ fn test_values() {
         (" hi {x:^4}-you rock", " hi  X  -you rock", 0),
 
         // fill confusion
-        ("{x:10}", "         X", 0),
+        ("{x:10}", "X         ", 0),
+        ("{x:>10}", "         X", 0),
+        ("{x:0<5}", "X0000", 0),
+        ("{x:0>5}", "0000X", 0),
         ("{long:.3}", "too", 0),
-        ("{long:<5.3}", "too  ", 0),
-        ("{long:5.3}", "  too", 0),
+        ("{long:5.3}", "too  ", 0),
+        ("{long:>5.3}", "  too", 0),
         ("{long:5.7}", "toooloo", 0),
         ("{long:<5.7}", "toooloo", 0),
+        ("{long:>5.7}", "toooloo", 0),
         ("{long:^5.7}", "toooloo", 0),
         ("{long:<}", &too_long, 0),
         ("{long:<<}", &too_long, 0),
@@ -130,6 +134,10 @@ fn test_values() {
         ("{x:<4d}", "", 3),
         ("{x:,}", "", 3),
         ("{x:<-10}", "", 3),
+
+        // TODO
+        ("{x:0=5}", "00X00", 1),
+        ("{x:03}", "00X", 1),
     ];
 
     run_tests(&values, &vars, &strfmt);

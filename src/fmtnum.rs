@@ -3,6 +3,8 @@ macro_rules! fmtint {
         #[allow(unused_comparisons)]
         impl<'a, 'b> Formatter<'a, 'b> {
             pub fn $t(&mut self, x: $t) -> Result<()> {
+                self.set_default_align(Alignment::Right);
+
                 let ty = match self.ty() {
                     None => ' ',
                     Some(c) => c,
@@ -63,6 +65,8 @@ macro_rules! fmtfloat {
     ($($t:ident)*) => ($(
         impl<'a, 'b> Formatter<'a, 'b> {
             pub fn $t(&mut self, x: $t) -> Result<()> {
+                self.set_default_align(Alignment::Right);
+
                 let ty = match self.ty() {
                     None => 'f',
                     Some(c) => c,

@@ -72,7 +72,7 @@ pub trait Map {
    fn get_map(&self, k: &Self::Key) -> Option<Self::Out>;
 }
 
-impl<'b, K: Eq + Hash, T> Map for &'b HashMap<K, T> {
+impl<'b, K: Eq + Hash, T, S: std::hash::BuildHasher> Map for &'b HashMap<K, T, S> {
    type Key = K;
    type Out = &'b T;
    fn get_map(&self, k: &Self::Key) -> Option<Self::Out>{

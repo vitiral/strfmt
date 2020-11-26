@@ -10,9 +10,9 @@ macro_rules! matches {
     }
 }
 
-fn run_tests<T: fmt::Display>(values: &Vec<(&str, &str, u8)>,
-             vars: &HashMap<String, T>,
-             call: &Fn(&str, &HashMap<String, T>)
+fn run_tests<K, T: fmt::Display, M: Map<Key=K, Out=T> + Copy>(values: &Vec<(&str, &str, u8)>,
+             vars: M,
+             call: &Fn(&str, M)
                       -> Result<String>) {
     for &(fmtstr, expected, expect_err) in values.iter() {
         let result = call(fmtstr, vars);
@@ -138,6 +138,98 @@ fn test_values() {
         // TODO
         ("{x:0=5}", "00X00", 1),
         ("{x:03}", "00X", 1),
+    ];
+
+    run_tests(&values, &vars, &strfmt);
+}
+
+#[test]
+/// test using a fn as the map
+fn test_fn() {
+    // format, expected, error
+    // error codes: 0 == no error, 1 == Invalid, 2 == KeyError
+    let values: Vec<(&str, &str, u8)> = vec![
+        // simple positioning
+        ("{x}", "6", 0),
+        ("{long}", "100000", 0),
+        (" the answer is {hi}, haven't you read anything?",
+         " the answer is 42, haven't you read anything?", 0),
+    ];
+
+    fn vars(x: &String) -> Option<&'static u64> {
+      let x: &str = x;
+      match x {
+        "x" => Some(&6),
+        "long" => Some(&100000),
+        "hi" => Some(&42),
+        _ => None,
+      }
+    }
+    let vars2: &dyn Fn(&String) -> Option<&'static u64> = &vars;
+
+    run_tests(&values, vars2, &strfmt);
+}
+
+#[test]
+/// test using a closure as the map
+fn test_closure() {
+    // format, expected, error
+    // error codes: 0 == no error, 1 == Invalid, 2 == KeyError
+    let values: Vec<(&str, &str, u8)> = vec![
+        // simple positioning
+        ("{x}", "6", 0),
+        ("{long}", "100000", 0),
+        (" the answer is {hi}, haven't you read anything?",
+         " the answer is 42, haven't you read anything?", 0),
+    ];
+
+    let vars2: &dyn Fn(&String) -> Option<&'static u64> = &|x| {
+      let x: &str = x;
+      match x {
+        "x" => Some(&6),
+        "long" => Some(&100000),
+        "hi" => Some(&42),
+        _ => None,
+      }
+    };
+
+    run_tests(&values, vars2, &strfmt);
+}
+
+#[test]
+/// test using a closure that counts the length
+fn test_closure_length() {
+    // format, expected, error
+    // error codes: 0 == no error, 1 == Invalid, 2 == KeyError
+    let values: Vec<(&str, &str, u8)> = vec![
+        ("{x}", "1", 0),
+        ("{long}", "4", 0),
+        ("{mylength}", "8", 0),
+    ];
+
+    let vars: Box<Fn(&String) -> Option<usize>> = Box::new(|x| {
+      Some(x.len())
+    });
+
+    run_tests(&values, &*vars, &strfmt);
+}
+
+#[test]
+/// test using integers directly into format (uses Display)
+fn test_ints_btree() {
+    let mut vars: BTreeMap<String, u64> = Default::default();
+    vars.insert("x".to_string(), 6);
+    vars.insert("long".to_string(), 100000);  // len=10
+    vars.insert("hi".to_string(), 42);
+
+    // format, expected, error
+    // error codes: 0 == no error, 1 == Invalid, 2 == KeyError
+    let values: Vec<(&str, &str, u8)> = vec![
+        // simple positioning
+        ("{x}", "6", 0),
+        ("{long}", "100000", 0),
+        (" the answer is {hi}, haven't you read anything?",
+         " the answer is 42, haven't you read anything?", 0),
     ];
 
     run_tests(&values, &vars, &strfmt);

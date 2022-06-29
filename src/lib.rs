@@ -24,10 +24,30 @@ pub use types::{Alignment, FmtError, Result, Sign};
 fmtint!(u8 i8 u16 i16 u32 i32 u64 i64 usize isize);
 fmtfloat!(f32 f64);
 
+pub trait TypeFormatting{
+    fn do_format(&self,f:&mut Formatter) -> Result<()>;
+}
+
+impl TypeFormatting for &str {
+    fn do_format(&self, f: &mut Formatter) -> Result<()> {
+        f.str(self)
+    }
+}
+
+impl TypeFormatting for String {
+    fn do_format(&self, f: &mut Formatter) -> Result<()> {
+        f.str(self)
+    }
+}
+
+fmttype!(u8 i8 u16 i16 u32 i32 u64 i64 usize isize);
+fmttype!(f32 f64);
+
 /// Rust-style format a string given a `HashMap` of the variables.
-pub fn strfmt<K, T: fmt::Display>(fmtstr: &str, vars: &HashMap<K, T>) -> Result<String>
-where
-    K: Hash + Eq + FromStr,
+pub fn strfmt<'a, K, T>(fmtstr: &str, vars: &HashMap<K, T>) -> Result<String>
+    where
+        K: Hash + Eq + FromStr,
+        T: fmt::Display + TypeFormatting
 {
     let formatter = |mut fmt: Formatter| {
         let k: K = match fmt.key.parse() {
@@ -42,30 +62,30 @@ where
                 return Err(new_key_error(fmt.key));
             }
         };
-        fmt.str(v.to_string().as_str())
+        v.do_format(&mut fmt)
     };
     strfmt_map(fmtstr, &formatter)
 }
 
 pub trait Format {
-    fn format<K, D: fmt::Display>(&self, vars: &HashMap<K, D>) -> Result<String>
-    where
-        K: Hash + Eq + FromStr;
+    fn format<K, D: fmt::Display+ TypeFormatting>(&self, vars: &HashMap<K, D>) -> Result<String>
+        where
+            K: Hash + Eq + FromStr;
 }
 
 impl Format for String {
-    fn format<'a, K, D: fmt::Display>(&self, vars: &HashMap<K, D>) -> Result<String>
-    where
-        K: Hash + Eq + FromStr,
+    fn format<'a, K, D: fmt::Display + TypeFormatting>(&self, vars: &HashMap<K, D>) -> Result<String>
+        where
+            K: Hash + Eq + FromStr,
     {
         strfmt(self.as_str(), vars)
     }
 }
 
 impl Format for str {
-    fn format<K, D: fmt::Display>(&self, vars: &HashMap<K, D>) -> Result<String>
-    where
-        K: Hash + Eq + FromStr,
+    fn format<K, D: fmt::Display+ TypeFormatting>(&self, vars: &HashMap<K, D>) -> Result<String>
+        where
+            K: Hash + Eq + FromStr,
     {
         strfmt(self, vars)
     }

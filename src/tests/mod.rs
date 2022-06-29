@@ -2,6 +2,7 @@ mod fmt;
 mod key;
 mod strfmt;
 mod test_trait;
+mod float;
 
 use super::FmtError;
 

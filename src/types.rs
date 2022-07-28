@@ -1,8 +1,7 @@
-use std::fmt;
 use std::error;
-use std::string::String;
+use std::fmt;
 use std::result;
-
+use std::string::String;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Alignment {
@@ -35,9 +34,9 @@ pub type Result<T> = result::Result<T, FmtError>;
 /// LOC-error
 #[derive(Debug, PartialEq)]
 pub enum FmtError {
-    Invalid(String),  // format string is structued incorrectly
-    KeyError(String), // key error in formatting string
-    TypeError(String),     // invalid type used
+    Invalid(String),   // format string is structued incorrectly
+    KeyError(String),  // key error in formatting string
+    TypeError(String), // invalid type used
 }
 
 impl fmt::Display for FmtError {
@@ -89,4 +88,3 @@ impl error::Error for FmtError {
 //     String,
 //     Debug,
 // }
-

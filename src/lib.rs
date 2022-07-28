@@ -50,8 +50,8 @@ fmtfloat!(f32 f64);
 /// println!("{}", strfmt("{Alpha} {Beta:<5.2}",&my_vars).unwrap());
 /// ```
 pub fn strfmt<'a, K, T: DisplayStr>(fmtstr: &str, vars: &HashMap<K, T>) -> Result<String>
-    where
-        K: Hash + Eq + FromStr
+where
+    K: Hash + Eq + FromStr,
 {
     let formatter = |mut fmt: Formatter| {
         let k: K = match fmt.key.parse() {
@@ -73,10 +73,13 @@ pub fn strfmt<'a, K, T: DisplayStr>(fmtstr: &str, vars: &HashMap<K, T>) -> Resul
 
 /// Rust-style format a string given a `HashMap` of the variables.
 /// see [strfmt] for details
-#[deprecated(since = "0.2.0", note = "This function contains a bug when formatting numbers. Use strfmt instead")]
+#[deprecated(
+    since = "0.2.0",
+    note = "This function contains a bug when formatting numbers. Use strfmt instead"
+)]
 pub fn strfmt_display<'a, K, T: fmt::Display>(fmtstr: &str, vars: &HashMap<K, T>) -> Result<String>
-    where
-        K: Hash + Eq + FromStr
+where
+    K: Hash + Eq + FromStr,
 {
     let formatter = |mut fmt: Formatter| {
         let k: K = match fmt.key.parse() {
@@ -109,13 +112,13 @@ macro_rules! display_str_impl {
 display_str_impl!(u8 i8 u16 i16 u32 i32 u64 i64 usize isize);
 display_str_impl!(f32 f64);
 
-impl DisplayStr for String{
+impl DisplayStr for String {
     fn display_str(&self, f: &mut Formatter) -> Result<()> {
         f.str(self.as_str())
     }
 }
 
-impl DisplayStr for &str{
+impl DisplayStr for &str {
     fn display_str(&self, f: &mut Formatter) -> Result<()> {
         f.str(self)
     }
@@ -123,7 +126,7 @@ impl DisplayStr for &str{
 /// This trait is effectively an re-implementation for [std::fmt::Display]
 /// It is used to disguise between the value types that should be formatted
 pub trait DisplayStr {
-    fn display_str(&self, f:&mut Formatter) -> Result<()>;
+    fn display_str(&self, f: &mut Formatter) -> Result<()>;
 }
 
 /// This trait is a shortcut for [strfmt]
@@ -151,27 +154,30 @@ pub trait Format {
     /// println!("{}", "|{Alpha}|{Beta:<5.2}|".format(&my_vars).unwrap());
     /// ```
     fn format<K, D: DisplayStr>(&self, vars: &HashMap<K, D>) -> Result<String>
-        where
-            K: Hash + Eq + FromStr;
+    where
+        K: Hash + Eq + FromStr;
 
     /// format a string using strfmt_display
     /// see [Format::format] for usage
-    #[deprecated(since = "0.2.0", note = "This function contains a bug when formatting numbers. Use format instead")]
+    #[deprecated(
+        since = "0.2.0",
+        note = "This function contains a bug when formatting numbers. Use format instead"
+    )]
     fn format_display<K, D: fmt::Display>(&self, vars: &HashMap<K, D>) -> Result<String>
-        where
-            K: Hash + Eq + FromStr;
+    where
+        K: Hash + Eq + FromStr;
 }
 
 impl Format for String {
     fn format<'a, K, D: DisplayStr>(&self, vars: &HashMap<K, D>) -> Result<String>
-        where
-            K: Hash + Eq + FromStr,
+    where
+        K: Hash + Eq + FromStr,
     {
         strfmt(self.as_str(), vars)
     }
     fn format_display<'a, K, D: fmt::Display>(&self, vars: &HashMap<K, D>) -> Result<String>
-        where
-            K: Hash + Eq + FromStr,
+    where
+        K: Hash + Eq + FromStr,
     {
         #[allow(deprecated)]
         strfmt_display(self.as_str(), vars)
@@ -180,14 +186,14 @@ impl Format for String {
 
 impl Format for str {
     fn format<K, D: DisplayStr>(&self, vars: &HashMap<K, D>) -> Result<String>
-        where
-            K: Hash + Eq + FromStr,
+    where
+        K: Hash + Eq + FromStr,
     {
         strfmt(self, vars)
     }
     fn format_display<'a, K, D: fmt::Display>(&self, vars: &HashMap<K, D>) -> Result<String>
-        where
-            K: Hash + Eq + FromStr,
+    where
+        K: Hash + Eq + FromStr,
     {
         #[allow(deprecated)]
         strfmt_display(self, vars)

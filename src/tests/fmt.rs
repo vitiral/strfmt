@@ -1,7 +1,6 @@
 use super::super::formatter::Formatter;
 use super::super::types::*;
 
-
 #[test]
 fn test_fmt_from_str() {
     let s = String::new();

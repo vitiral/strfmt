@@ -1,6 +1,5 @@
-
-use std::collections::HashMap;
 use super::super::*;
+use std::collections::HashMap;
 
 #[test]
 fn test_trait() {

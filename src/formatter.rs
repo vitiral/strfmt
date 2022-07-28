@@ -1,7 +1,7 @@
-use std::str;
 use std::fmt;
 use std::fmt::Write;
 use std::iter::Iterator;
+use std::str;
 use std::string::String;
 
 use types::*;
@@ -37,17 +37,7 @@ fn is_sign_element(c: char) -> bool {
 
 fn is_type_element(c: char) -> bool {
     match c {
-        'b' |
-        'o' |
-        'x' |
-        'X' |
-        'e' |
-        'E' |
-        'f' |
-        'F' |
-        '%' |
-        's' |
-        '?' => true,
+        'b' | 'o' | 'x' | 'X' | 'e' | 'E' | 'f' | 'F' | '%' | 's' | '?' => true,
         _ => false,
     }
 }
@@ -78,7 +68,6 @@ fn get_integer(s: &[u8], pos: usize) -> (usize, Option<i64>) {
         (consumed, val)
     }
 }
-
 
 #[derive(Debug)]
 /// The format struct as it is defined in the python source
@@ -126,8 +115,9 @@ fn parse_like_python(rest: &str) -> Result<FmtPy> {
 
     // If the second char is an alignment token,
     // then fake_fill as fill
-    if end - pos >= 1 + fake_fill.len_utf8() &&
-       is_alignment_token(rest[pos + fake_fill.len_utf8()] as char) {
+    if end - pos >= 1 + fake_fill.len_utf8()
+        && is_alignment_token(rest[pos + fake_fill.len_utf8()] as char)
+    {
         format.align = rest[pos + fake_fill.len_utf8()] as char;
         format.fill = fake_fill;
         fill_specified = true;
@@ -165,7 +155,11 @@ fn parse_like_python(rest: &str) -> Result<FmtPy> {
     pos += consumed;
     if consumed != 0 {
         match val {
-            None => return Err(FmtError::Invalid("overflow error when parsing width".to_string())),
+            None => {
+                return Err(FmtError::Invalid(
+                    "overflow error when parsing width".to_string(),
+                ))
+            }
             Some(v) => {
                 format.width = v;
             }
@@ -186,8 +180,9 @@ fn parse_like_python(rest: &str) -> Result<FmtPy> {
         if consumed != 0 {
             match val {
                 None => {
-                    return Err(FmtError::Invalid("overflow error when parsing precision"
-                                                     .to_string()))
+                    return Err(FmtError::Invalid(
+                        "overflow error when parsing precision".to_string(),
+                    ))
                 }
                 Some(v) => {
                     format.precision = v;
@@ -196,11 +191,12 @@ fn parse_like_python(rest: &str) -> Result<FmtPy> {
         } else {
             // Not having a precision after a dot is an error.
             if consumed == 0 {
-                return Err(FmtError::Invalid("Format specifier missing precision".to_string()));
+                return Err(FmtError::Invalid(
+                    "Format specifier missing precision".to_string(),
+                ));
             }
         }
         pos += consumed;
-
     }
 
     // Finally, parse the type field.
@@ -224,15 +220,7 @@ fn parse_like_python(rest: &str) -> Result<FmtPy> {
     // we're doing (int, float, string).
     if format.thousands {
         match format.ty {
-            'd' |
-            'e' |
-            'f' |
-            'g' |
-            'E' |
-            'G' |
-            '%' |
-            'F' |
-            '\0' => {} /* These are allowed. See PEP 378.*/
+            'd' | 'e' | 'f' | 'g' | 'E' | 'G' | '%' | 'F' | '\0' => {} /* These are allowed. See PEP 378.*/
 
             _ => {
                 let mut msg = String::new();
@@ -326,7 +314,6 @@ impl<'a, 'b> Formatter<'a, 'b> {
         Ok(())
     }
 
-
     /// fill getter
     pub fn fill(&self) -> char {
         self.fill
@@ -402,7 +389,7 @@ impl<'a, 'b> Formatter<'a, 'b> {
             Some(c) => match c {
                 'b' | 'o' | 'x' | 'X' => true,
                 _ => false,
-            }
+            },
         }
     }
 
@@ -415,11 +402,10 @@ impl<'a, 'b> Formatter<'a, 'b> {
             Some(c) => match c {
                 'f' | 'e' | 'E' => true,
                 _ => false,
-            }
+            },
         }
     }
 }
-
 
 impl<'a, 'b> fmt::Write for Formatter<'a, 'b> {
     fn write_str(&mut self, s: &str) -> fmt::Result {

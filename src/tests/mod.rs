@@ -1,9 +1,9 @@
+mod float;
 mod fmt;
 mod key;
+mod legacy;
 mod strfmt;
 mod test_trait;
-mod float;
-mod legacy;
 
 use super::FmtError;
 

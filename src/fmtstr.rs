@@ -1,8 +1,8 @@
 use std::fmt::Write;
 use std::string::String;
 
-use types::*;
 use formatter::Formatter;
+use types::*;
 
 fn write_char(f: &mut Formatter, c: char, n: usize) {
     for _ in 0..n {
@@ -22,7 +22,8 @@ fn test_write_char() {
 }
 
 fn write_from<I>(fmt: &mut Formatter, f: I, n: usize) -> usize
-    where I: Iterator<Item = char>
+where
+    I: Iterator<Item = char>,
 {
     // eexaust f or run out of n, return chars written
     if n == 0 {
@@ -40,7 +41,7 @@ fn write_from<I>(fmt: &mut Formatter, f: I, n: usize) -> usize
 }
 
 #[test]
-    fn test_write_from() {
+fn test_write_from() {
     let mut s = String::new();
     s.write_str("h ").unwrap();
     {
@@ -73,16 +74,27 @@ impl<'a, 'b> Formatter<'a, 'b> {
         self.set_default_align(Alignment::Left);
         if !(self.ty() == None || self.ty() == Some('s')) {
             let mut msg = String::new();
-            write!(msg, "Unknown format code {:?} for object of type 'str'", self.ty()).unwrap();
+            write!(
+                msg,
+                "Unknown format code {:?} for object of type 'str'",
+                self.ty()
+            )
+            .unwrap();
             return Err(FmtError::TypeError(msg));
         } else if self.alternate() {
-            return Err(FmtError::TypeError("Alternate form (#) not allowed in string \
-                                            format specifier".to_string()));
+            return Err(FmtError::TypeError(
+                "Alternate form (#) not allowed in string \
+                                            format specifier"
+                    .to_string(),
+            ));
         } else if self.thousands() {
-            return Err(FmtError::TypeError("Cannot specify ',' with 's'".to_string()));
+            return Err(FmtError::TypeError(
+                "Cannot specify ',' with 's'".to_string(),
+            ));
         } else if self.sign().is_unspecified() {
-            return Err(FmtError::TypeError("Sign not allowed in string format specifier"
-                                           .to_string()));
+            return Err(FmtError::TypeError(
+                "Sign not allowed in string format specifier".to_string(),
+            ));
         }
         self.str_unchecked(s)
     }
@@ -102,11 +114,13 @@ impl<'a, 'b> Formatter<'a, 'b> {
         let precision = self.precision();
         // precision will limit length
         let len = match precision {
-            Some(p) => if p < s.len() {
-                p
-            } else {
-                s.len()
-            },
+            Some(p) => {
+                if p < s.len() {
+                    p
+                } else {
+                    s.len()
+                }
+            }
             None => s.len(),
         };
 
@@ -126,8 +140,11 @@ impl<'a, 'b> Formatter<'a, 'b> {
                     Alignment::Right => {
                         write_char(self, fill, width - len);
                     }
-                    Alignment::Equal => return Err(FmtError::Invalid(
-                        "sign aware zero padding and Align '=' not yet supported".to_string())),
+                    Alignment::Equal => {
+                        return Err(FmtError::Invalid(
+                            "sign aware zero padding and Align '=' not yet supported".to_string(),
+                        ))
+                    }
                     Alignment::Unspecified => unreachable!(),
                 }
             }
@@ -136,9 +153,7 @@ impl<'a, 'b> Formatter<'a, 'b> {
         write_char(self, fill, pad);
         Ok(())
     }
-
 }
-
 
 /// UNSTABLE: the Formatter object is still considered unstable
 /// Do not use this function if you aren't willing to have changes
@@ -147,7 +162,8 @@ impl<'a, 'b> Formatter<'a, 'b> {
 /// format a string given the string and a closure that uses
 /// a Formatter
 pub fn strfmt_map<F>(fmtstr: &str, f: &F) -> Result<String>
-    where F: Fn(Formatter) -> Result<()>
+where
+    F: Fn(Formatter) -> Result<()>,
 {
     let mut out = String::with_capacity(fmtstr.len() * 2);
     let mut bytes_read: usize = 0;
@@ -199,15 +215,21 @@ pub fn strfmt_map<F>(fmtstr: &str, f: &F) -> Result<String>
                 bytes_read = 0;
             }
         } else if closing_brace {
-            return Err(FmtError::Invalid("Single '}' encountered in format string".to_string()));
+            return Err(FmtError::Invalid(
+                "Single '}' encountered in format string".to_string(),
+            ));
         } else if !reading_fmt {
             out.push(c)
         } // else we are currently reading a format string, so don't push
     }
     if closing_brace {
-        return Err(FmtError::Invalid("Single '}' encountered in format string".to_string()));
+        return Err(FmtError::Invalid(
+            "Single '}' encountered in format string".to_string(),
+        ));
     } else if reading_fmt {
-        return Err(FmtError::Invalid("Expected '}' before end of string".to_string()));
+        return Err(FmtError::Invalid(
+            "Expected '}' before end of string".to_string(),
+        ));
     }
     out.shrink_to_fit();
     Ok(out)

@@ -1,19 +1,23 @@
 #![allow(unused_variables)]
 
-use std::fmt;
-use std::collections::HashMap;
 use super::super::*;
+use std::collections::HashMap;
+use std::fmt;
 
 macro_rules! matches {
     ($e:expr, $p:pat) => {
-        match $e { $p => true, _ => false }
-    }
+        match $e {
+            $p => true,
+            _ => false,
+        }
+    };
 }
 
-fn run_tests<T: fmt::Display>(values: &Vec<(&str, &str, u8)>,
-             vars: &HashMap<String, T>,
-             call: &dyn Fn(&str, &HashMap<String, T>)
-                      -> Result<String>) {
+fn run_tests<T: fmt::Display>(
+    values: &Vec<(&str, &str, u8)>,
+    vars: &HashMap<String, T>,
+    call: &dyn Fn(&str, &HashMap<String, T>) -> Result<String>,
+) {
     for &(fmtstr, expected, expect_err) in values.iter() {
         let result = call(fmtstr, vars);
         let mut failure = match expect_err {
@@ -21,7 +25,7 @@ fn run_tests<T: fmt::Display>(values: &Vec<(&str, &str, u8)>,
             1 => !matches!(result, Err(FmtError::Invalid(_))),
             2 => !matches!(result, Err(FmtError::KeyError(_))),
             3 => !matches!(result, Err(FmtError::TypeError(_))),
-            c@_ => panic!("error code {} DNE", c),
+            c @ _ => panic!("error code {} DNE", c),
         };
         let result = match result {
             Err(e) => e.to_string(),
@@ -40,7 +44,7 @@ fn run_tests<T: fmt::Display>(values: &Vec<(&str, &str, u8)>,
                     1 => "FmtError::Invalid",
                     2 => "FmtError::KeyError",
                     3 => "FmtError::TypeError",
-                    _ => unreachable!()
+                    _ => unreachable!(),
                 };
                 println!("  expected: {}", expected)
             } else {
@@ -49,7 +53,6 @@ fn run_tests<T: fmt::Display>(values: &Vec<(&str, &str, u8)>,
             assert!(false);
         }
     }
-
 }
 
 #[test]
@@ -57,7 +60,7 @@ fn test_values() {
     let mut vars: HashMap<String, String> = HashMap::new();
     let too_long = "toooloooong".to_string();
     vars.insert("x".to_string(), "X".to_string());
-    vars.insert("long".to_string(), too_long.clone());  // len=10
+    vars.insert("long".to_string(), too_long.clone()); // len=10
     vars.insert("hi".to_string(), "hi".to_string());
 
     // format, expected, error
@@ -71,11 +74,9 @@ fn test_values() {
         ("{x:<3}", "X  ", 0),
         ("{x:^3}", " X ", 0),
         ("{x:^4}", " X  ", 0),
-
         // extra text
         (" {x}yz", " Xyz", 0),
         (" hi {x:^4}-you rock", " hi  X  -you rock", 0),
-
         // fill confusion
         ("{x:10}", "X         ", 0),
         ("{x:>10}", "         X", 0),
@@ -91,15 +92,12 @@ fn test_values() {
         ("{long:<}", &too_long, 0),
         ("{long:<<}", &too_long, 0),
         ("{long:<<5}", &too_long, 0),
-
         // valid types
         ("{x:<4s}", "X   ", 0),
-
         // escape
         ("{{}}", "{}", 0),
         ("{{long}}", "{long}", 0),
         ("{{{x}}}", "{X}", 0),
-
         // fun
         ("{x:<>}", "X", 0),
         ("{x:<>3}", "<<X", 0),
@@ -107,24 +105,20 @@ fn test_values() {
         ("{{{x}}}", "{X}", 0),
         ("{{{x}{{{{{{", "{X{{{", 0),
         ("{x}}}}}", "X}}", 0),
-
         // invalid fmt
         ("{}", "", 1),
         ("{:3}", "", 1),
         ("{xxx:  <88.3}", "", 1),
-
         // invalid escape
         ("}", "", 1),
         ("{{}}}", "", 1),
         ("hi } there", "", 1),
         ("hi }", "", 1),
         ("w { ho", "", 1),
-
         // invalid keys
         ("{what}", "{}", 2),
         ("{who}", "{}", 2),
         ("{x} {where}", "{}", 2),
-
         // invalid types
         ("{x:<<<}", "", 3),
         ("{x:*}", "", 3),
@@ -134,7 +128,6 @@ fn test_values() {
         ("{x:<4d}", "", 3),
         ("{x:,}", "", 3),
         ("{x:<-10}", "", 3),
-
         // TODO
         ("{x:0=5}", "00X00", 1),
         ("{x:03}", "00X", 1),
@@ -148,7 +141,7 @@ fn test_values() {
 fn test_ints_basic() {
     let mut vars: HashMap<String, u64> = HashMap::new();
     vars.insert("x".to_string(), 6);
-    vars.insert("long".to_string(), 100000);  // len=10
+    vars.insert("long".to_string(), 100000); // len=10
     vars.insert("hi".to_string(), 42);
 
     // format, expected, error
@@ -157,8 +150,11 @@ fn test_ints_basic() {
         // simple positioning
         ("{x}", "6", 0),
         ("{long}", "100000", 0),
-        (" the answer is {hi}, haven't you read anything?",
-         " the answer is 42, haven't you read anything?", 0),
+        (
+            " the answer is {hi}, haven't you read anything?",
+            " the answer is 42, haven't you read anything?",
+            0,
+        ),
     ];
 
     run_tests(&values, &vars, &strfmt);
@@ -172,18 +168,19 @@ fn test_ignore_missing() {
         // simple positioning
         ("{y}", "{y}", 0),
         ("{y} {x}", "{y} X", 0),
-        ("{x} {longish:<32.3} {x} is nice", "X {longish:<32.3} X is nice", 0),
+        (
+            "{x} {longish:<32.3} {x} is nice",
+            "X {longish:<32.3} X is nice",
+            0,
+        ),
     ];
-    let f = |mut fmt: Formatter| {
-        match vars.get(fmt.key) {
-            Some(v) => fmt.str(v),
-            None => fmt.skip(),
-        }
+    let f = |mut fmt: Formatter| match vars.get(fmt.key) {
+        Some(v) => fmt.str(v),
+        None => fmt.skip(),
     };
 
-    let strfmt_ignore = |fmtstr: &str, vars: &HashMap<String, String>| -> Result<String> {
-        strfmt_map(fmtstr, &f)
-    };
+    let strfmt_ignore =
+        |fmtstr: &str, vars: &HashMap<String, String>| -> Result<String> { strfmt_map(fmtstr, &f) };
     run_tests(&values, &vars, &strfmt_ignore);
 }
 
@@ -339,4 +336,3 @@ test_int!(test_i8 i8, test_i16 i16, test_i32 i32, test_i64 i64, test_isize isize
 //     let fmtstr = "short: {x:*^10.3} long: {long:%<14.9}";
 //     b.iter(|| strfmt(fmtstr, &vars));
 // }
-

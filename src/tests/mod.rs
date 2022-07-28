@@ -3,6 +3,7 @@ mod key;
 mod strfmt;
 mod test_trait;
 mod float;
+mod legacy;
 
 use super::FmtError;
 

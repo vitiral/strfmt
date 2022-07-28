@@ -8,11 +8,11 @@ fn test_fmt_float64() -> Result<(),FmtError> {
     vars.insert("One".to_string(), 10.0 / 3.0);
     vars.insert("Two".to_string(), 2.0);
 
-    assert_eq!("0".to_string(),"{Zero}".format_ext(&vars)?);
-    assert_eq!("0.00".to_string(),"{Zero:.2}".format_ext(&vars)?);
-    assert_eq!("3.33333".to_string(),"{One:.5}".format_ext(&vars)?);
-    assert_eq!("2".to_string(),"{Two}".format_ext(&vars)?);
-    assert_eq!("0.00 ".to_string(),"{Zero:<5.2}".format_ext(&vars)?);
+    assert_eq!("0".to_string(),"{Zero}".format(&vars)?);
+    assert_eq!("0.00".to_string(),"{Zero:.2}".format(&vars)?);
+    assert_eq!("3.33333".to_string(),"{One:.5}".format(&vars)?);
+    assert_eq!("2".to_string(),"{Two}".format(&vars)?);
+    assert_eq!("0.00 ".to_string(),"{Zero:<5.2}".format(&vars)?);
 
     Ok(())
 }
@@ -24,11 +24,11 @@ fn test_fmt_float32() -> Result<(),FmtError> {
     vars.insert("One".to_string(), 10.0 / 3.0);
     vars.insert("Two".to_string(), 2.0);
 
-    assert_eq!("0".to_string(),"{Zero}".format_ext(&vars)?);
-    assert_eq!("0.00".to_string(),"{Zero:.2}".format_ext(&vars)?);
-    assert_eq!("3.33333".to_string(),"{One:.5}".format_ext(&vars)?);
-    assert_eq!("2".to_string(),"{Two}".format_ext(&vars)?);
-    assert_eq!("0.00 ".to_string(),"{Zero:<5.2}".format_ext(&vars)?);
+    assert_eq!("0".to_string(),"{Zero}".format(&vars)?);
+    assert_eq!("0.00".to_string(),"{Zero:.2}".format(&vars)?);
+    assert_eq!("3.33333".to_string(),"{One:.5}".format(&vars)?);
+    assert_eq!("2".to_string(),"{Two}".format(&vars)?);
+    assert_eq!("0.00 ".to_string(),"{Zero:<5.2}".format(&vars)?);
 
     Ok(())
 }

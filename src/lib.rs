@@ -173,6 +173,7 @@ impl Format for String {
         where
             K: Hash + Eq + FromStr,
     {
+        #[allow(deprecated)]
         strfmt_display(self.as_str(), vars)
     }
 }
@@ -188,6 +189,7 @@ impl Format for str {
         where
             K: Hash + Eq + FromStr,
     {
+        #[allow(deprecated)]
         strfmt_display(self, vars)
     }
 }

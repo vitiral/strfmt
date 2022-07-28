@@ -193,8 +193,8 @@ pub fn strfmt_map<F>(fmtstr: &str, f: &F) -> Result<String>
                 let (_, fmt_pattern) = fmt_pattern.split_at(1);
                 let (fmt_pattern, _) = fmt_pattern.split_at(fmt_pattern.len() - 1);
                 // use the closure to write the formatted string
-                let fmt = try!(Formatter::from_str(fmt_pattern, &mut out));
-                try!(f(fmt));
+                let fmt = Formatter::from_str(fmt_pattern, &mut out)?;
+                f(fmt)?;
                 reading_fmt = false;
                 bytes_read = 0;
             }

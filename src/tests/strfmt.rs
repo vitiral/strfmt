@@ -12,7 +12,7 @@ macro_rules! matches {
 
 fn run_tests<T: fmt::Display>(values: &Vec<(&str, &str, u8)>,
              vars: &HashMap<String, T>,
-             call: &Fn(&str, &HashMap<String, T>)
+             call: &dyn Fn(&str, &HashMap<String, T>)
                       -> Result<String>) {
     for &(fmtstr, expected, expect_err) in values.iter() {
         let result = call(fmtstr, vars);

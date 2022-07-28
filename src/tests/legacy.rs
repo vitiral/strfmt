@@ -4,6 +4,7 @@ use ::{FmtError, Format};
 /// cautione here, this test just checks if the old float formatting behaviour is still present,
 /// as this was changed in 0.2.0
 #[test]
+#[allow(deprecated)]
 fn test_legacy() -> Result<(),FmtError> {
     let mut vars: HashMap<String, f64> = HashMap::new();
     vars.insert("Zero".to_string(), 0.0);

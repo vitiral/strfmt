@@ -47,13 +47,7 @@ fmtfloat!(f32 f64);
 /// my_vars.insert("Alpha".to_string(),42.0);
 /// my_vars.insert("Beta".to_string(),PI);
 ///
-/// let result = strfmt("{Alpha} {Beta:<5.2}",&my_vars);
-///
-/// if let Ok(text) = result {
-///     println!("{}",text);
-/// }else {
-///     println!("{}","woops?");
-/// }
+/// println!(strfmt("{Alpha} {Beta:<5.2}",&my_vars)?);
 /// ```
 pub fn strfmt<'a, K, T: DisplayStr>(fmtstr: &str, vars: &HashMap<K, T>) -> Result<String>
     where
@@ -154,13 +148,7 @@ pub trait Format {
     /// my_vars.insert("Alpha".to_string(),42.0);
     /// my_vars.insert("Beta".to_string(),PI);
     ///
-    /// let result = "|{Alpha}|{Beta:<5.2}|".format(&my_vars);
-    ///
-    /// if let Ok(text) = result {
-    ///     println!("{}",text);
-    /// }else {
-    ///     println!("{}","woops?");
-    /// }
+    /// println!("|{Alpha}|{Beta:<5.2}|".format(&my_vars)?);
     /// ```
     fn format<K, D: DisplayStr>(&self, vars: &HashMap<K, D>) -> Result<String>
         where

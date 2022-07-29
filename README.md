@@ -38,6 +38,10 @@ if you are providing your users a ui or are reading configuration files.
 strfmt does not support empty identifiers (i.e. `{}` or `{:<10}`. Integer identifiers
 will be read as str keys to the hashmap (i.e. `{1:<10}` will have key == "1")
 
+## Legacy
+In the 0.2.0 update, the signature of `strfmt` and `Format::format` changed to fix a bug with numeric formatting.
+For easy migration the `strfmt_display` and `Format::format_dispaly` function provide the old behaviour.
+
 ## **BETA**: Formatting numeric types
 > This feature is in Beta and may change. I expect it to be fairly stable
 > at this point but would appreciate feedback on development.

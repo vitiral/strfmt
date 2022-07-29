@@ -76,11 +76,10 @@ See the [syntax](https://doc.rust-lang.org/std/fmt/#syntax) for how to create a 
 - [ ] get strfmt_map out of Beta and create Format.format_map method
 - [ ] handle sign aware zero padding for numeric types
 - [x] format any Display type
-- [x] stabalize `strfmt_map` and add `format_map` to the `Format` trait.
+- [x] stabilize `strfmt_map` and add `format_map` to the `Format` trait.
 - [x] add `f64` method to `Formatter` allowing those using `strfmt_map` to format f64s according to the spec
 - [x] add `i64` method to `Formatter` allowing those using `strfmt_map` to format i64s according to the spec
-- [ ] add `format_f64(&self, HashMap<String, f64>` method to `Format` allowing users to easily format a hashmap of i64 values
-- [ ] add `format_i64(&self, HashMap<String, i64>` method to `Format` allowing users to easily format a hashmap of i64 values
+- [x] use DisplayStr trait for formatting, permitting proper formatting of integer types.
 - [ ] look for a rust library has "unbounded float" (like python) and add that to the formatter
 - [ ] look for a rust library has "unbounded integer" (like python) and add that to the formatter
 - [ ] Implement `vec` method to `Formatter` allowing those usin `strfmt_map` to format types of `Vec<Display>` in a way that uses precision and width (precision will limit the number of elements displayed, width the width of each element)

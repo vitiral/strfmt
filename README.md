@@ -9,7 +9,7 @@ This library is for rust developers who want to bring rust-like
 formatting to non-static strings. 
 
 ## Basic use of formatting Display types
-```
+``` rust
 extern crate strfmt;
 use strfmt::strfmt;
 use std::collections::HashMap;
@@ -28,7 +28,7 @@ fn it_works() {
 In addition to the `strfmt` function, this library has the `Format` trait which adds the
 `format` method to `str` and `String` types.
 
-```
+``` rust
 assert_eq!("hi, my name is {name}".format(&vars), "hi, my name is bob")
 ```
 
@@ -46,7 +46,7 @@ will be read as str keys to the hashmap (i.e. `{1:<10}` will have key == "1")
 > for numeric types
 
 Using `strfmt_map` it is also possible to format integers and floats:
-```
+``` rust
 let mut vars: HashMap<String, f64> = HashMap::new();
 vars.insert("x".to_string(), 42.4242);
 vars.insert("y".to_string(), -100.11111);

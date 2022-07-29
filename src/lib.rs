@@ -130,6 +130,7 @@ impl DisplayStr for Box<dyn DisplayStr> {
         self.as_ref().display_str(f)
     }
 }
+
 /// This trait is effectively an re-implementation for [std::fmt::Display]
 /// It is used to disguise between the value types that should be formatted
 pub trait DisplayStr {

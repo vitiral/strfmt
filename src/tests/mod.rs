@@ -4,6 +4,7 @@ mod key;
 mod legacy;
 mod strfmt;
 mod test_trait;
+mod macros;
 
 use super::FmtError;
 

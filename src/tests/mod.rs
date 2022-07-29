@@ -2,6 +2,7 @@ mod float;
 mod fmt;
 mod key;
 mod legacy;
+mod macros;
 mod strfmt;
 mod test_trait;
 

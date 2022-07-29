@@ -15,6 +15,7 @@ mod types;
 
 #[macro_use]
 mod fmtnum;
+mod macros;
 
 pub use fmtstr::strfmt_map;
 pub use formatter::Formatter;
@@ -123,6 +124,13 @@ impl DisplayStr for &str {
         f.str(self)
     }
 }
+
+impl DisplayStr for Box<dyn DisplayStr> {
+    fn display_str(&self, f: &mut Formatter) -> Result<()> {
+        self.as_ref().display_str(f)
+    }
+}
+
 /// This trait is effectively an re-implementation for [std::fmt::Display]
 /// It is used to disguise between the value types that should be formatted
 pub trait DisplayStr {

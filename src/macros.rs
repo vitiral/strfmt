@@ -1,4 +1,4 @@
-/// format a given string with the passed variables
+/// Format a given string with the passed variables.
 /// This macro is creating an single used Hashmap, for performance optimizations it might be
 /// more efficient to reuse an existing one.
 ///
@@ -14,9 +14,11 @@
 /// use strfmt::FmtError;
 /// use strfmt::{strfmt,strfmt_builder};
 ///
+/// let fmt = "{first}{second:7.2}";
+/// // ... do stuff and adjust fmt as you need
 /// let first = "test";
 /// //test  77.65
-/// println!("{}",strfmt!("{first}{second:7.2}", first,second => 77.6543210).unwrap());
+/// println!("{}",strfmt!(fmt, first,second => 77.6543210).unwrap());
 /// ```
 #[macro_export]
 macro_rules! strfmt {

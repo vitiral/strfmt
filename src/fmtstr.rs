@@ -115,13 +115,13 @@ impl<'a, 'b> Formatter<'a, 'b> {
         // precision will limit length
         let len = match precision {
             Some(p) => {
-                if p < s.len() {
+                if p < s.chars().count() {
                     p
                 } else {
-                    s.len()
+                    s.chars().count()
                 }
             }
-            None => s.len(),
+            None => s.chars().count(),
         };
 
         let mut chars = s.chars();

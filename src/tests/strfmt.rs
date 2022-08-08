@@ -62,6 +62,7 @@ fn test_values() {
     vars.insert("x".to_string(), "X".to_string());
     vars.insert("long".to_string(), too_long.clone()); // len=10
     vars.insert("hi".to_string(), "hi".to_string());
+    vars.insert("unicode".to_string(), "ಠ_ಠ".to_string());
 
     // format, expected, error
     // error codes: 0 == no error, 1 == Invalid, 2 == KeyError
@@ -77,6 +78,10 @@ fn test_values() {
         // extra text
         (" {x}yz", " Xyz", 0),
         (" hi {x:^4}-you rock", " hi  X  -you rock", 0),
+        // unicode
+        (">{unicode:^7}<", ">  ಠ_ಠ  <", 0),
+        ("{unicode:<5}", "ಠ_ಠ  ", 0),
+        ("{unicode:>5}", "  ಠ_ಠ", 0),
         // fill confusion
         ("{x:10}", "X         ", 0),
         ("{x:>10}", "         X", 0),

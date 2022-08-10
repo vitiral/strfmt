@@ -112,16 +112,17 @@ impl<'a, 'b> Formatter<'a, 'b> {
         let fill = self.fill();
         let width = self.width();
         let precision = self.precision();
+        let chars_count = s.chars().count();
         // precision will limit length
         let len = match precision {
             Some(p) => {
-                if p < s.len() {
+                if p < chars_count {
                     p
                 } else {
-                    s.len()
+                    chars_count
                 }
             }
-            None => s.len(),
+            None => chars_count,
         };
 
         let mut chars = s.chars();

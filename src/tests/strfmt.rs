@@ -59,6 +59,7 @@ fn run_tests<T: fmt::Display>(
 fn test_values() {
     let mut vars: HashMap<String, String> = HashMap::new();
     let too_long = "toooloooong".to_string();
+    let rust_unicode = format!(">{:^7}<", "ಠ_ಠ");
     vars.insert("x".to_string(), "X".to_string());
     vars.insert("long".to_string(), too_long.clone()); // len=10
     vars.insert("hi".to_string(), "hi".to_string());
@@ -80,6 +81,7 @@ fn test_values() {
         (" hi {x:^4}-you rock", " hi  X  -you rock", 0),
         // unicode
         (">{unicode:^7}<", ">  ಠ_ಠ  <", 0),
+        (">{unicode:^7}<", &rust_unicode, 0),
         ("{unicode:<5}", "ಠ_ಠ  ", 0),
         ("{unicode:>5}", "  ಠ_ಠ", 0),
         // fill confusion

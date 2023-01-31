@@ -191,6 +191,11 @@ fn test_ignore_missing() {
     run_tests(&values, &vars, &strfmt_ignore);
 }
 
+#[test]
+fn test_trailing_comma() {
+    strfmt!("{foo}", foo => "bar", ).expect("Trailing comma test failed");
+}
+
 macro_rules! test_float {
     ($($name:ident $t:ident),*) => ($(
         #[test]

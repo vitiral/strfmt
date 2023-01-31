@@ -22,6 +22,9 @@
 /// ```
 #[macro_export]
 macro_rules! strfmt {
+    ($inst:expr, $($key:ident => $value:tt),*,) => {
+        strfmt!($inst, $($key => $value)*)
+    };
     ($inst:expr,$($values:tt)*) =>({
         use std::collections::HashMap;
         use $crate::{DisplayStr,strfmt_builder};

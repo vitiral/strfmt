@@ -194,6 +194,8 @@ fn test_ignore_missing() {
 #[test]
 fn test_trailing_comma() {
     strfmt!("{foo}", foo => "bar", ).expect("Trailing comma test failed");
+    let foo = "bar";
+    strfmt!("{foo}", foo,).expect("Trailing comma test failed");
 }
 
 macro_rules! test_float {

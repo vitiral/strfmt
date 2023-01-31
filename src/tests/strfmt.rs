@@ -191,6 +191,13 @@ fn test_ignore_missing() {
     run_tests(&values, &vars, &strfmt_ignore);
 }
 
+#[test]
+fn test_trailing_comma() {
+    assert!(strfmt!("{foo}", foo => "bar", ) == Ok("bar".into()));
+    let foo = "bar";
+    assert!(strfmt!("{foo}", foo,) == Ok("bar".into()));
+}
+
 macro_rules! test_float {
     ($($name:ident $t:ident),*) => ($(
         #[test]

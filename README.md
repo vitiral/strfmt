@@ -16,26 +16,30 @@ fn it_works() {
     vars.insert("job".to_string(), "python developer");
 
     let fmt = "hi, my name is {name} and I am a {job}!".to_string();
-    assert_eq!(strfmt(&fmt, &vars).unwrap(), "hi, my name is bob and I am a python developer!")
+    assert_eq!(
+      strfmt(&fmt, &vars).unwrap(),
+      "hi, my name is bob and I am a python developer!")
 }
 ```
 
-In addition to the `strfmt` function, this library has the `Format` trait which adds the
-`format` method to `str` and `String` types.
+In addition to the `strfmt` function, this library has the `Format` trait which
+adds the `format` method to `str` and `String` types.
 
 ``` rust
 assert_eq!("hi, my name is {name}".format(&vars), "hi, my name is bob")
 ```
 
-You can use this library any time you have dynamic strings you want to format, such as
-if you are providing your users a ui or are reading configuration files.
+You can use this library any time you have dynamic strings you want to format,
+such as if you are providing your users a ui or are reading configuration files.
 
-strfmt does not support empty identifiers (i.e. `{}` or `{:<10}`. Integer identifiers
-will be read as str keys to the hashmap (i.e. `{1:<10}` will have key == "1")
+strfmt does not support empty identifiers (i.e. `{}` or `{:<10}`. Integer
+identifiers will be read as str keys to the hashmap (i.e. `{1:<10}` will have
+key == "1")
 
 ## Legacy
-In the 0.2.0 update, the signature of `strfmt` and `Format::format` changed to fix a bug with numeric formatting.
-For easy migration the `strfmt_display` and `Format::format_dispaly` function provide the old behaviour.
+In the 0.2.0 update, the signature of `strfmt` and `Format::format` changed to
+fix a bug with numeric formatting.  For easy migration the `strfmt_display` and
+`Format::format_display` function provide the old behaviour.
 
 ## **BETA**: Formatting numeric types
 > This feature is in Beta and may change. I expect it to be fairly stable
@@ -62,10 +66,11 @@ assert_eq!(strfmt_map("{z:+.2E}", f).unwrap(), "+0.00E0");
 # Status and Goals
 
 **strfmt** aims to support all of the formatting options defined in
-[`std::fmt`](https://doc.rust-lang.org/std/fmt/). Currently it officially only supports 
-the format options for strings (beta support for i64 and f64)
+[`std::fmt`](https://doc.rust-lang.org/std/fmt/). Currently it officially only
+supports the format options for strings (beta support for i64 and f64)
 
-See the [syntax](https://doc.rust-lang.org/std/fmt/#syntax) for how to create a formatted string
+See the [syntax](https://doc.rust-lang.org/std/fmt/#syntax) for how to create a
+formatted string
 
 ### Current Status (in order of priority)
 - [ ] get strfmt_map out of Beta and create Format.format_map method
@@ -81,10 +86,15 @@ See the [syntax](https://doc.rust-lang.org/std/fmt/#syntax) for how to create a 
 - [ ] special suppport to format HashMap<String, String> for improved speed
 - [ ] special suppport to format HashMap<String, &str> for improved speed
 - [ ] special suppport to format HashMap<&str, &str> for improved speed
-    
-    
+
+
 ### HELP
-Adding functionality should be fairly easy, the main piece of work is checking and handling
-the flags correctly and creating comprehensive tests. Hopefully I will be creating the `f64`
-method soon to show how it can be done, but I could really use all the help I can get on
-making this libray complete.
+I (@vitiral) am no longer an active maintainer of this library or any rust code,
+but I accept pull requests that fix bugs or implement the above features. All
+pull requests must be tested appropriately.
+
+Adding functionality should be fairly easy, the main piece of work is checking
+and handling the flags correctly and creating comprehensive tests. Hopefully I
+will be creating the `f64` method soon to show how it can be done, but I could
+really use all the help I can get on making this libray complete.
+

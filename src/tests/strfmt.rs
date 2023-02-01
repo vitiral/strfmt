@@ -193,9 +193,9 @@ fn test_ignore_missing() {
 
 #[test]
 fn test_trailing_comma() {
-    strfmt!("{foo}", foo => "bar", ).expect("Trailing comma test failed");
+    assert!(strfmt!("{foo}", foo => "bar", ) == Ok("bar".into()));
     let foo = "bar";
-    strfmt!("{foo}", foo,).expect("Trailing comma test failed");
+    assert!(strfmt!("{foo}", foo,) == Ok("bar".into()));
 }
 
 macro_rules! test_float {

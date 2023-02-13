@@ -16,7 +16,7 @@ macro_rules! matches {
 fn run_tests<T: fmt::Display>(
     values: &Vec<(&str, &str, u8)>,
     vars: &HashMap<String, T>,
-    call: &dyn Fn(&str, &HashMap<String, T>) -> Result<String>,
+    call: &mut dyn FnMut(&str, &HashMap<String, T>) -> Result<String>,
 ) {
     for &(fmtstr, expected, expect_err) in values.iter() {
         let result = call(fmtstr, vars);
@@ -140,7 +140,7 @@ fn test_values() {
         ("{x:03}", "00X", 1),
     ];
 
-    run_tests(&values, &vars, &strfmt);
+    run_tests(&values, &vars, &mut strfmt);
 }
 
 #[test]
@@ -164,7 +164,7 @@ fn test_ints_basic() {
         ),
     ];
 
-    run_tests(&values, &vars, &strfmt);
+    run_tests(&values, &vars, &mut strfmt);
 }
 
 #[test]
@@ -181,14 +181,14 @@ fn test_ignore_missing() {
             0,
         ),
     ];
-    let f = |mut fmt: Formatter| match vars.get(fmt.key) {
+    let mut f = |mut fmt: Formatter| match vars.get(fmt.key) {
         Some(v) => fmt.str(v),
         None => fmt.skip(),
     };
 
-    let strfmt_ignore =
-        |fmtstr: &str, vars: &HashMap<String, String>| -> Result<String> { strfmt_map(fmtstr, &f) };
-    run_tests(&values, &vars, &strfmt_ignore);
+    let mut strfmt_ignore =
+        |fmtstr: &str, vars: &HashMap<String, String>| -> Result<String> { strfmt_map(fmtstr, &mut f) };
+    run_tests(&values, &vars, &mut strfmt_ignore);
 }
 
 #[test]
@@ -225,17 +225,17 @@ macro_rules! test_float {
                 // TODO
                 ("{x:+010.2}", "+0042.4242", 1),
             ];
-            let f = |mut fmt: Formatter| {
+            let mut f = |mut fmt: Formatter| {
                 match vars.get(fmt.key) {
                     Some(v) => fmt.$t(*v),
                     None => panic!(),
                 }
             };
 
-            let strfmt_float = |fmtstr: &str, vars: &HashMap<String, $t>| -> Result<String> {
-                strfmt_map(fmtstr, &f)
+            let mut strfmt_float = |fmtstr: &str, vars: &HashMap<String, $t>| -> Result<String> {
+                strfmt_map(fmtstr, &mut f)
             };
-            run_tests(&values, &vars, &strfmt_float);
+            run_tests(&values, &vars, &mut strfmt_float);
          }
     )*)
 }
@@ -275,17 +275,17 @@ macro_rules! test_uint {
                 // TODO
                 ("{x:+010}", "+000000042", 1),
             ];
-            let f = |mut fmt: Formatter| {
+            let mut f = |mut fmt: Formatter| {
                 match vars.get(fmt.key) {
                     Some(v) => fmt.$t(*v),
                     None => panic!(),
                 }
             };
 
-            let strfmt_int = |fmtstr: &str, vars: &HashMap<String, $t>| -> Result<String> {
-                strfmt_map(fmtstr, &f)
+            let mut strfmt_int = |fmtstr: &str, vars: &HashMap<String, $t>| -> Result<String> {
+                strfmt_map(fmtstr, &mut f)
             };
-            run_tests(&values, &vars, &strfmt_int);
+            run_tests(&values, &vars, &mut strfmt_int);
          }
     )*)
 }
@@ -324,17 +324,17 @@ macro_rules! test_int {
                 // TODO
                 ("{x:+010}", "+000000042", 1),
             ];
-            let f = |mut fmt: Formatter| {
+            let mut f = |mut fmt: Formatter| {
                 match vars.get(fmt.key) {
                     Some(v) => fmt.$t(*v),
                     None => panic!(),
                 }
             };
 
-            let strfmt_uint = |fmtstr: &str, vars: &HashMap<String, $t>| -> Result<String> {
-                strfmt_map(fmtstr, &f)
+            let mut strfmt_uint = |fmtstr: &str, vars: &HashMap<String, $t>| -> Result<String> {
+                strfmt_map(fmtstr, &mut f)
             };
-            run_tests(&values, &vars, &strfmt_uint);
+            run_tests(&values, &vars, &mut strfmt_uint);
         }
     )*)
 }

@@ -193,6 +193,28 @@ fn test_ignore_missing() {
 }
 
 #[test]
+fn test_mut_closure() {
+
+    let mut key_list = vec![];
+    let f = |fmt: Formatter| {
+        match fmt.key.parse::<String>() {
+            Ok(key) => {
+                key_list.push(key);
+            },
+            Err(_) => {
+                return Err(FmtError::KeyError(format!("Invalid key: {}", fmt.key)));
+            }
+        };
+        fmt.skip()
+    };
+
+    let _ = strfmt_map("{one} two {three:4.4}", f).unwrap();
+
+    assert_eq!(key_list, vec!["one", "three"]);
+}
+
+
+#[test]
 fn test_trailing_comma() {
     assert!(strfmt!("{foo}", foo => "bar", ) == Ok("bar".into()));
     let foo = "bar";

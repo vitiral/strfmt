@@ -162,10 +162,11 @@ impl<'a, 'b> Formatter<'a, 'b> {
 ///
 /// format a string given the string and a closure that uses
 /// a Formatter
-pub fn strfmt_map<F>(fmtstr: &str, f: &mut F) -> Result<String>
+pub fn strfmt_map<F>(fmtstr: &str, f: F) -> Result<String>
 where
     F: FnMut(Formatter) -> Result<()>,
 {
+    let mut f = f;
     let mut out = String::with_capacity(fmtstr.len() * 2);
     let mut bytes_read: usize = 0;
     let mut opening_brace: usize = 0;

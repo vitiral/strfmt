@@ -54,7 +54,7 @@ pub fn strfmt<'a, K, T: DisplayStr>(fmtstr: &str, vars: &HashMap<K, T>) -> Resul
 where
     K: Hash + Eq + FromStr,
 {
-    let mut formatter = |mut fmt: Formatter| {
+    let formatter = |mut fmt: Formatter| {
         let k: K = match fmt.key.parse() {
             Ok(k) => k,
             Err(_) => {
@@ -69,7 +69,7 @@ where
         };
         v.display_str(&mut fmt)
     };
-    strfmt_map(fmtstr, &mut formatter)
+    strfmt_map(fmtstr, &formatter)
 }
 
 /// Rust-style format a string given a `HashMap` of the variables.
@@ -82,7 +82,7 @@ pub fn strfmt_display<'a, K, T: fmt::Display>(fmtstr: &str, vars: &HashMap<K, T>
 where
     K: Hash + Eq + FromStr,
 {
-    let mut formatter = |mut fmt: Formatter| {
+    let formatter = |mut fmt: Formatter| {
         let k: K = match fmt.key.parse() {
             Ok(k) => k,
             Err(_) => {
@@ -97,7 +97,7 @@ where
         };
         fmt.str(v.to_string().as_str())
     };
-    strfmt_map(fmtstr, &mut formatter)
+    strfmt_map(fmtstr, &formatter)
 }
 
 macro_rules! display_str_impl {

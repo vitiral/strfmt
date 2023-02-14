@@ -188,7 +188,7 @@ fn test_ignore_missing() {
     };
 
     let strfmt_ignore =
-        |fmtstr: &str, vars: &HashMap<String, String>| -> Result<String> { strfmt_map(fmtstr, f) };
+        |fmtstr: &str, vars: &HashMap<String, String>| -> Result<String> { strfmt_map(fmtstr, &f) };
     run_tests(&values, &vars, &strfmt_ignore);
 }
 

@@ -13,11 +13,12 @@ macro_rules! matches {
     };
 }
 
-fn run_tests<T: fmt::Display>(
+fn run_tests<T: fmt::Display, F: FnMut(&str, &HashMap<String, T>) -> Result<String>>(
     values: &Vec<(&str, &str, u8)>,
     vars: &HashMap<String, T>,
-    call: &dyn Fn(&str, &HashMap<String, T>) -> Result<String>,
+    call: F,
 ) {
+    let mut call = call;
     for &(fmtstr, expected, expect_err) in values.iter() {
         let result = call(fmtstr, vars);
         let mut failure = match expect_err {
@@ -190,6 +191,28 @@ fn test_ignore_missing() {
         |fmtstr: &str, vars: &HashMap<String, String>| -> Result<String> { strfmt_map(fmtstr, &f) };
     run_tests(&values, &vars, &strfmt_ignore);
 }
+
+#[test]
+fn test_mut_closure() {
+
+    let mut key_list = vec![];
+    let f = |fmt: Formatter| {
+        match fmt.key.parse::<String>() {
+            Ok(key) => {
+                key_list.push(key);
+            },
+            Err(_) => {
+                return Err(FmtError::KeyError(format!("Invalid key: {}", fmt.key)));
+            }
+        };
+        fmt.skip()
+    };
+
+    let _ = strfmt_map("{one} two {three:4.4}", f).unwrap();
+
+    assert_eq!(key_list, vec!["one", "three"]);
+}
+
 
 #[test]
 fn test_trailing_comma() {

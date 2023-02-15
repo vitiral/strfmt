@@ -125,6 +125,12 @@ impl DisplayStr for &str {
     }
 }
 
+impl DisplayStr for &dyn DisplayStr {
+    fn display_str(&self, f: &mut Formatter) -> Result<()> {
+        (*self).display_str(f)
+    }
+}
+
 impl DisplayStr for Box<dyn DisplayStr> {
     fn display_str(&self, f: &mut Formatter) -> Result<()> {
         self.as_ref().display_str(f)

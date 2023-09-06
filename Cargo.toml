@@ -9,3 +9,4 @@ authors = ["Garrett Berg <vitiral@gmail.com>"]
 license = "MIT"
 
 [dependencies]
+serde_json = { version = "1.0.105" , optional = true }

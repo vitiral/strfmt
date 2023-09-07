@@ -30,4 +30,5 @@ impl  Map<String, String> for std::env::Vars {
     }
 }
 
+#[cfg(feature = "serde_json" )]
 mod serde_json_impl; 

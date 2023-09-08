@@ -1,9 +1,26 @@
-# strfmt: rust library for formatting dynamic strings
+# Index  
+- [strfmt: rust library for formatting dynamic strings](#introduction)
+- [Basic use of formatting Display types ](#basic-usage)
+    - [Code Snippet](#codesnippet1)
+- [Using the Map trait for customizing the display](#map-trait)
+    - [Note on Future Stdlib Implementation of a Map trait](#stdlib-impl)
+    - [Trait Definition](#map-trait-definition)
+    - [Method Prioritization](#map-trait-priority)
+    - [Note on Format::format_display and strfmt_display ](#strfmt-display-note)
+- [Legacy ](#legacy)
+- [**BETA**: Formatting numeric types](#beta-numeric)
+- [Status and Goals ](#status-and-goals)
+    - [Current Status (in order of priority) ](#current-status)
+- [HELP ](#help)
+
+# strfmt: rust library for formatting dynamic strings<a name = "introduction"></a>
 
 This library is for rust developers who want to bring rust-like
 formatting to non-static strings.
 
-## Basic use of formatting Display types
+## Basic use of formatting Display types <a name = "basic-usage"></a>
+
+<a name = "codesnippet1"></a>
 ``` rust
 extern crate strfmt;
 use strfmt::strfmt;
@@ -36,12 +53,53 @@ strfmt does not support empty identifiers (i.e. `{}` or `{:<10}`. Integer
 identifiers will be read as str keys to the hashmap (i.e. `{1:<10}` will have
 key == "1")
 
-## Legacy
+## Using the Map trait for customizing the display<a name="map-trait"></a> 
+
+Pursuant to [Github Issue #17](https://github.com/vitiral/strfmt/issues/17) this trait is implemented. 
+
+
+> <a name = "stdlib-impl"></a>
+Note: If the rust stdlib implements a Map trait for HashMap-like containers (equivalent to the Iterator trait for containers), this trait should probably be overriden 
+
+> Or implement a default implementation of this trait for all generic types implementing the stdlib equivalent 
+
+Instead of using a `HashMap`, you can also use your custom structs using the `strfmt::Map` trait
+
+It implements two methods as described below: 
+
+<a name = "map-trait-definition"></a>
+```rust 
+pub trait Map<K , V> where K: Hash + Eq + FromStr, V: DisplayStr{
+    
+    /// Prioritized first 
+    /// Returns a reference 
+    /// Use to return a reference if possible 
+    fn get(&self, key : &K) -> Option<&V>; 
+
+
+    ///Returned an owned item instead of a reference 
+    ///Prioritized second
+    ///Use this one if you cannot return a reference due to borrow checker limitations 
+    #[allow(unused_variables)]
+    fn get_owned(&self, key : &K) -> Option<V>{
+        None //This is done because HashMap and serde_json Map can both return references  
+    }
+}
+```
+
+<a name = "map-trait-priority"></a>
+Function `get` is prioritzed, and your custom type should return a *reference* if possible. If not possible, it should return `None` and use `get_owned` instead. Which returns an *owned* type. 
+
+If both return `None`, an error is raised. 
+
+> <a name = "strfmt-display-note"></a> Note: strfmt_display only works for HashMaps. It is not implemented for Map trait implementations. Similarly, Format::format_display is not implemented for Map trait objects. 
+
+## Legacy <a name = "legacy"></a>
 In the 0.2.0 update, the signature of `strfmt` and `Format::format` changed to
 fix a bug with numeric formatting.  For easy migration the `strfmt_display` and
 `Format::format_display` function provide the old behaviour.
 
-## **BETA**: Formatting numeric types
+## **BETA**: Formatting numeric types<a name="beta-numeric"></a>
 > This feature is in Beta and may change. I expect it to be fairly stable
 > at this point but would appreciate feedback on development.
 >
@@ -63,7 +121,7 @@ assert_eq!(strfmt_map("{y:+.2E}", f).unwrap(), "-1.00E2");
 assert_eq!(strfmt_map("{z:+.2E}", f).unwrap(), "+0.00E0");
 ```
 
-# Status and Goals
+# Status and Goals <a name="status-and-goals"></a>
 
 **strfmt** aims to support all of the formatting options defined in
 [`std::fmt`](https://doc.rust-lang.org/std/fmt/). Currently it officially only
@@ -72,7 +130,7 @@ supports the format options for strings (beta support for i64 and f64)
 See the [syntax](https://doc.rust-lang.org/std/fmt/#syntax) for how to create a
 formatted string
 
-### Current Status (in order of priority)
+### Current Status (in order of priority) <a name = "current-status"></a>
 - [ ] get strfmt_map out of Beta and create Format.format_map method
 - [ ] handle sign aware zero padding for numeric types
 - [x] format any Display type
@@ -88,7 +146,7 @@ formatted string
 - [ ] special suppport to format HashMap<&str, &str> for improved speed
 
 
-### HELP
+### HELP <a name="help"></a>
 I (@vitiral) am no longer an active maintainer of this library or any rust code,
 but I accept pull requests that fix bugs or implement the above features. All
 pull requests must be tested appropriately.

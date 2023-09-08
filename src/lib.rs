@@ -192,7 +192,7 @@ pub trait Format {
     ///
     /// println!("{}", "|{Alpha}|{Beta:<5.2}|".format(&my_vars).unwrap());
     /// ```
-    fn format<K, D: DisplayStr>(&self, vars: &HashMap<K, D>) -> Result<String>
+    fn format<K, D: DisplayStr>(&self, vars: &impl Map<K, D>) -> Result<String>
     where
         K: Hash + Eq + FromStr;
 
@@ -208,7 +208,7 @@ pub trait Format {
 }
 
 impl Format for String {
-    fn format<'a, K, D: DisplayStr>(&self, vars: &HashMap<K, D>) -> Result<String>
+    fn format<'a, K, D: DisplayStr>(&self, vars: &impl Map<K, D>) -> Result<String>
     where
         K: Hash + Eq + FromStr,
     {
@@ -224,7 +224,7 @@ impl Format for String {
 }
 
 impl Format for str {
-    fn format<K, D: DisplayStr>(&self, vars: &HashMap<K, D>) -> Result<String>
+    fn format<K, D: DisplayStr>(&self, vars: &impl Map<K, D>) -> Result<String>
     where
         K: Hash + Eq + FromStr,
     {

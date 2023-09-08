@@ -3,9 +3,14 @@ use std::str::FromStr;
 use std::hash::Hash; 
 use std::collections::HashMap; 
 
+
+///Trait for custom implementation of formatting 
+///Specifies two methods that can be used for formatting 
+///Any custom object implementing Map can be used for the formatting variable stores 
 pub trait Map<K , V> where K: Hash + Eq + FromStr, V: DisplayStr{
     
-    ///Prioritized first 
+    /// Prioritized first 
+    /// 
     fn get(&self, key : &K) -> Option<&V>; 
 
 

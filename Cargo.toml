@@ -1,6 +1,6 @@
 [package]
 name = "strfmt"
-version = "0.2.4"
+version = "0.2.5"
 description = "strfmt: rust library for formatting dynamic strings"
 repository = "https://github.com/vitiral/strfmt"
 readme = "README.md"
@@ -9,4 +9,4 @@ authors = ["Garrett Berg <vitiral@gmail.com>"]
 license = "MIT"
 
 [dependencies]
-serde_json = { version = "1.0.105" , optional = true }
+serde_json = { version = "1.0.0" , optional = true }

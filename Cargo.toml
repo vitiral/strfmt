@@ -1,6 +1,6 @@
 [package]
 name = "strfmt"
-version = "0.2.5"
+version = "0.3.0"
 description = "strfmt: rust library for formatting dynamic strings"
 repository = "https://github.com/vitiral/strfmt"
 readme = "README.md"

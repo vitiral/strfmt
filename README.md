@@ -60,11 +60,7 @@ key == "1")
 Pursuant to [Github Issue #17](https://github.com/vitiral/strfmt/issues/17) this trait is implemented. 
 
 The Map trait is automatically implemented for all compliant HashMaps<br>
-<<<<<<< HEAD
 It can also be optionally implemented for `serde_json::Map`, `serde_json::Value` and `hashbrown::HashMap` (automatically) by using the features `serde_json` and `hashbrown` respectively
-=======
-It can also be optionally implemented for `serde_json::Map` and `hashbrown::HashMap` (automatically) by using the features `serde_json` and `hashbrown` respectively
->>>>>>> fae904cbddade9990e7b3c20370f9a1dc73b9be1
 
 
 > <a name = "stdlib-impl"></a>

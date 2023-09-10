@@ -4,13 +4,12 @@ use std::hash::Hash;
 use std::collections::HashMap; 
 
 
-///Trait for custom implementation of formatting 
+///Represents a generic Map. Implemented for HashMap and (optionally) serde's and Hashbrown's Map
 ///Specifies two methods that can be used for formatting 
 ///Any custom object implementing Map can be used for the formatting variable stores 
 pub trait Map<K , V> where K: Hash + Eq + FromStr, V: DisplayStr{
     
-    /// Prioritized first 
-    /// 
+    /// Prioritized first
     fn get(&self, key : &K) -> Option<&V>; 
 
 
@@ -37,3 +36,6 @@ impl  Map<String, String> for std::env::Vars {
 
 #[cfg(feature = "serde_json" )]
 mod serde_json_impl; 
+
+#[cfg(feature = "hashbrown")]
+mod hashbrown_impl; 

@@ -1,5 +1,10 @@
-# Index  
-- [strfmt: rust library for formatting dynamic strings](#introduction)
+
+# strfmt: rust library for formatting dynamic strings
+
+This library is for rust developers who want to bring rust-like
+formatting to non-static strings.
+
+# Table Of Contents  
 - [Basic use of formatting Display types ](#basic-usage)
     - [Code Snippet](#codesnippet1)
 - [Using the Map trait for customizing the display](#map-trait)
@@ -13,10 +18,7 @@
     - [Current Status (in order of priority) ](#current-status)
 - [HELP ](#help)
 
-# strfmt: rust library for formatting dynamic strings<a name = "introduction"></a>
 
-This library is for rust developers who want to bring rust-like
-formatting to non-static strings.
 
 ## Basic use of formatting Display types <a name = "basic-usage"></a>
 
@@ -56,6 +58,9 @@ key == "1")
 ## Using the Map trait for customizing the display<a name="map-trait"></a> 
 
 Pursuant to [Github Issue #17](https://github.com/vitiral/strfmt/issues/17) this trait is implemented. 
+
+The Map trait is automatically implemented for all compliant HashMaps<br>
+It can also be optionally implemented for `serde_json::Map` and `hashbrown::HashMap` (automatically) by using the features `serde_json` and `hashbrown` respectively
 
 
 > <a name = "stdlib-impl"></a>

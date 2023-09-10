@@ -373,3 +373,34 @@ test_int!(test_i8 i8, test_i16 i16, test_i32 i32, test_i64 i64, test_isize isize
 //     let fmtstr = "short: {x:*^10.3} long: {long:%<14.9}";
 //     b.iter(|| strfmt(fmtstr, &vars));
 // }
+
+
+#[cfg(feature = "serde_json")]
+#[test]
+fn test_serde_json(){
+
+    let map : serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{"name": "Robinhood", "age": "33" , "color" : "green"}"#).unwrap();
+    let fmt  = "{name} is {age} years old and {color:<8} is his favorite color";
+    let res = strfmt(fmt, &map);
+    assert_eq!(res.unwrap(), "Robinhood is 33 years old and green    is his favorite color");
+}
+
+#[cfg(feature = "hashbrown")]
+#[test]
+fn test_hashbrown(){
+
+    let map = hashbrown::HashMap::from([("name".to_string(), "Robinhood"), ("age".to_string(), "33") , ("color".to_string() , "green")]);
+    let fmt  = "{name} is {age} years old and {color:<8} is his favorite color";
+    let res = strfmt(fmt, &map);
+    assert_eq!(res.unwrap(), "Robinhood is 33 years old and green    is his favorite color");
+}
+
+#[cfg(feature = "serde_json")]
+#[test]
+fn test_serde_json_alignment_and_stuff(){
+
+    let map : serde_json::Map<String, serde_json::Value> = serde_json::from_str(r#"{"name": "Robinhood", "age": 33.01 , "color" : "green"}"#).unwrap();
+    let fmt  = "{name} is {age:.2} years old and {color:#>8} is his favorite color";
+    let res = strfmt(fmt, &map);
+    assert_eq!(res.unwrap(), "Robinhood is 33.01 years old and ###green is his favorite color");
+}

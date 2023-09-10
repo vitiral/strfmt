@@ -404,3 +404,18 @@ fn test_serde_json_alignment_and_stuff(){
     let res = strfmt(fmt, &map);
     assert_eq!(res.unwrap(), "Robinhood is 33.01 years old and ###green is his favorite color");
 }
+
+#[cfg(feature = "serde_json")]
+#[test]
+fn test_serde_json_value_map_impl(){
+    
+    let value : serde_json::Value = serde_json::json!({
+        "name" : "Robinhood",
+        "age" : 33.01,
+        "color" : "green"
+    });
+
+    let fmt  = "{name} is {age:.2} years old and {color:#>8} is his favorite color";
+    let res = strfmt(fmt, &value);
+    assert_eq!(res.unwrap(), "Robinhood is 33.01 years old and ###green is his favorite color");
+}

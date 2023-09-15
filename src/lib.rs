@@ -17,9 +17,6 @@ mod types;
 mod fmtnum;
 mod macros;
 
-mod maptrait; 
-pub use maptrait::Map; 
-
 pub use fmtstr::strfmt_map;
 pub use formatter::Formatter;
 pub use types::{Alignment, FmtError, Result, Sign};
@@ -53,7 +50,7 @@ fmtfloat!(f32 f64);
 ///
 /// println!("{}", strfmt("{Alpha} {Beta:<5.2}",&my_vars).unwrap());
 /// ```
-pub fn strfmt<'a, K, T: DisplayStr>(fmtstr: &str, vars: &impl Map<K, T>) -> Result<String>
+pub fn strfmt<'a, K, T: DisplayStr>(fmtstr: &str, vars: &HashMap<K, T>) -> Result<String>
 where
     K: Hash + Eq + FromStr,
 {
@@ -64,21 +61,13 @@ where
                 return Err(new_key_error(fmt.key));
             }
         };
-
-        let v = vars.get(&k);
-        
-        if v.is_some(){
-            return v.unwrap().display_str(&mut fmt); 
-        }
-
-        let v = vars.get_owned(&k);
-
-        if v.is_some(){
-            return v.as_ref().unwrap().display_str(&mut fmt)
-        }
-
-        return Err(new_key_error(fmt.key)); 
-
+        let v = match vars.get(&k) {
+            Some(v) => v,
+            None => {
+                return Err(new_key_error(fmt.key));
+            }
+        };
+        v.display_str(&mut fmt)
     };
     strfmt_map(fmtstr, &formatter)
 }
@@ -130,13 +119,6 @@ impl DisplayStr for String {
     }
 }
 
-impl DisplayStr for bool {
-    fn display_str(&self, f: &mut Formatter) -> Result<()> {
-        f.str(self.to_string().as_str())
-    }
-}
-
-
 impl DisplayStr for &str {
     fn display_str(&self, f: &mut Formatter) -> Result<()> {
         f.str(self)
@@ -144,13 +126,6 @@ impl DisplayStr for &str {
 }
 
 impl DisplayStr for &dyn DisplayStr {
-    fn display_str(&self, f: &mut Formatter) -> Result<()> {
-        (*self).display_str(f)
-    }
-}
-
-
-impl <T : DisplayStr> DisplayStr for &T{
     fn display_str(&self, f: &mut Formatter) -> Result<()> {
         (*self).display_str(f)
     }

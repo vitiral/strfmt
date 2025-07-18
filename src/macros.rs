@@ -45,7 +45,7 @@ macro_rules! strfmt_builder {
     };
     ($vars:expr,$value:expr,$($values:tt)*) => {
         $vars.insert(stringify!($value).to_string(),Box::new($value));
-        strfmt_builder!($vars,$($values)*)
+        $crate::strfmt_builder!($vars,$($values)*)
     };
     ($vars:expr,$name:ident => $value:expr,$($values:tt)*) => {
         $vars.insert(stringify!($name).to_string(),Box::new($value));

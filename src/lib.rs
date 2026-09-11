@@ -21,8 +21,8 @@ pub use fmtstr::strfmt_map;
 pub use formatter::Formatter;
 pub use types::{Alignment, FmtError, Result, Sign};
 
-// u128 & i128 unstable (see https://github.com/rust-lang/rust/issues/35118)
-fmtint!(u8 i8 u16 i16 u32 i32 u64 i64 usize isize);
+fmtint!(u8 i8 u16 i16 u32 i32 u64 i64 u128 i128 usize isize);
+// f16 & f128 unstable (see https://github.com/rust-lang/rust/issues/116909)
 fmtfloat!(f32 f64);
 
 /// Rust-style format a string given a `HashMap` of the variables.

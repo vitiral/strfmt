@@ -365,6 +365,52 @@ macro_rules! test_int {
 test_uint!(test_u8 u8, test_u16 u16, test_u32 u32, test_u64 u64, test_u128 u128, test_usize usize);
 test_int!(test_i8 i8, test_i16 i16, test_i32 i32, test_i64 i64, test_i128 i128, test_isize isize);
 
+/// The sign and the alternate-form prefix are part of the formatted
+/// number and must be padded *inside* the field width, like
+/// `format!` does (`format!("{:+7}", 42)` == `"    +42"`).
+#[test]
+fn sign_and_prefix_are_inside_the_width() {
+    let mut vars: HashMap<String, i64> = HashMap::new();
+    vars.insert("x".to_string(), 42);
+    vars.insert("y".to_string(), -100);
+    let f = |mut fmt: Formatter| match vars.get(fmt.key) {
+        Some(v) => fmt.i64(*v),
+        None => panic!(),
+    };
+    let cases: Vec<(&str, &str)> = vec![
+        ("{x:>+7}", "    +42"),
+        ("{x:<+7}", "+42    "),
+        ("{x:^+7}", "  +42  "),
+        ("{x:#8x}", "    0x2a"),
+        ("{x:>#8x}", "    0x2a"),
+        ("{x:<#8x}", "0x2a    "),
+        ("{x:^#8x}", "  0x2a  "),
+        ("{x:#10b}", "  0b101010"),
+        // negative numbers keep the sign from the value itself
+        ("{y:>+7}", "   -100"),
+    ];
+    for &(fmtstr, expected) in cases.iter() {
+        let result = strfmt_map(fmtstr, &f).unwrap();
+        assert_eq!(result, expected, "format {:?}", fmtstr);
+    }
+
+    let mut fvars: HashMap<String, f64> = HashMap::new();
+    fvars.insert("x".to_string(), 42.5);
+    let ff = |mut fmt: Formatter| match fvars.get(fmt.key) {
+        Some(v) => fmt.f64(*v),
+        None => panic!(),
+    };
+    let fcases: Vec<(&str, &str)> = vec![
+        ("{x:+8.2}", "  +42.50"),
+        ("{x:<+8.2}", "+42.50  "),
+        ("{x:^+8.2}", " +42.50 "),
+    ];
+    for &(fmtstr, expected) in fcases.iter() {
+        let result = strfmt_map(fmtstr, &ff).unwrap();
+        assert_eq!(result, expected, "format {:?}", fmtstr);
+    }
+}
+
 // #[bench]
 // fn bench_strfmt(b: &mut Bencher) {
 //     let mut vars: HashMap<String, String> = HashMap::new();
